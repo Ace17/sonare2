@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+./scripts/reformat.sh core plugins
+make -j`nproc`
+./bin/snr -h >/dev/null
