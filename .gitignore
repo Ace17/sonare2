@@ -1,5 +1,6 @@
 /bin
 /bin/*
+/tags
 
 # Compiled Object files
 *.slo

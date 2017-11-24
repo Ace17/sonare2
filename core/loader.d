@@ -25,6 +25,15 @@ void cmd_load(Document doc, string path)
   loader.load(doc, path);
 }
 
+void cmd_symbols(Document doc)
+{
+  import std.string;
+  doc.result = [];
+
+  foreach(addr, name; doc.symbols)
+    doc.result ~= format("0x%08X  :  %s", addr, name);
+}
+
 string guessFormat(string path)
 {
   foreach(name; g_Loaders.keys)

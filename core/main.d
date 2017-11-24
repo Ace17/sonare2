@@ -68,6 +68,7 @@ void safeMain(string[] args)
 
   addAction("load", &cmd_load, "loads an executable binary");
   addAction("arch", &cmd_setArch, "sets the architecture");
+  addAction("ii", &cmd_symbols, "list symbols");
   addAction("run", &run, "run an executable binary");
   addAction("disassemble", &cmd_disassemble, "disassemble");
 

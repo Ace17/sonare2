@@ -55,10 +55,10 @@ class ElfLoader : Loader
         if(iSymbolIdx == 0)
           continue;
 
-        if(s.st_shndx == SHN_UNDEF && s.st_name != 0)
+        if(s.st_name)
         {
           string sName = elf.GetSymbolName(symtab.section_index, iSymbolIdx);
-          // prog.addSymbol(sName, s.st_value);
+          prog.symbols[s.st_value] = sName;
         }
       }
     }
@@ -230,7 +230,6 @@ struct SByteInfo
     // return bHasRelocation;
   }
 
-  bool bCodeSyncPoint = false;
   bool bHasRelocation = false;
 
   CRelocation Relocation;

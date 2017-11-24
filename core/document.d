@@ -21,6 +21,10 @@ class Document
 
   ulong entryPoint;
   Instruction[] instructions;
+
+  string[ulong] symbols;
+
+  string[] result;
 }
 
 struct Instruction

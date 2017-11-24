@@ -12,6 +12,7 @@
 // Stores the state of the command line.
 
 import std.algorithm;
+import std.array;
 import std.string;
 
 import document;
@@ -150,7 +151,13 @@ class Presenter : InputSink
       }
     }
 
-    updateViewModel();
+    if(!empty(m_doc.result))
+    {
+      vm.lines = array(map!Line(m_doc.result));
+      m_doc.result = [];
+    }
+    else
+      updateViewModel();
   }
 
   void tryCompleteCommand()
@@ -175,7 +182,6 @@ private:
   void onCommand(string command)
   {
     shell.processOneLine(command);
-    updateViewModel();
   }
 }
 
