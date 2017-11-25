@@ -21,9 +21,9 @@ unittest
   auto s = new Shell;
   void nop() {}
 
-  s.addAction("save", &nop, "desc");
-  s.addAction("load", &nop, "desc");
-  s.addAction("loop", &nop, "desc");
+  s.addAction("save", &nop, Meta!nop, "desc");
+  s.addAction("load", &nop, Meta!nop, "desc");
+  s.addAction("loop", &nop, Meta!nop, "desc");
 
   assertEquals("save", s.complete("sav"));
   assertEquals("savi", s.complete("savi"));
@@ -35,6 +35,42 @@ unittest
   assertEquals("lo", s.complete("l"));
 }
 
+unittest
+{
+  // default arguments
+  auto s = new Shell;
+  string result;
+  void action(string s = "hello") { result = s; }
+
+  s.addAction("action", &action, Meta!action, "desc");
+  s.processOneLine("action");
+  assertEquals("hello", result);
+}
+
+struct MetaInfo
+{
+  string[] defaults;
+}
+
+MetaInfo Meta(alias F)()
+{
+  MetaInfo r;
+
+  alias ParamTypes = ParameterTypeTuple!F;
+  alias Defaults = ParameterDefaults!F;
+  const N = Defaults.length;
+
+  foreach(i, t; ParamTypes)
+  {
+    static if(is (Defaults[i] == void))
+      r.defaults ~= null;
+    else
+      r.defaults ~= Defaults[i];
+  }
+
+  return r;
+}
+
 class Shell
 {
 public:
@@ -43,24 +79,31 @@ public:
     m_actions["help"] = Action(&help, "shows this help");
   }
 
-  void addAction(F)(string name, F f, string desc)
+  void addAction(F)(string name, F f, MetaInfo meta, string desc)
   {
     void execute(string[] dynamicArgs)
     {
       alias ParamTypes = ParameterTypeTuple!F;
 
-      const N = ParamTypes.length;
-
-      if(dynamicArgs.length != N)
-      {
-        const msg = format("Command '%s' takes %s arguments, got %s", name, N, dynamicArgs.length);
-        throw new Exception(msg);
-      }
-
       ParamTypes argValues;
 
+      const N = ParamTypes.length;
+
+      if(dynamicArgs.length > N)
+        throw new Exception("Too many arguments");
+
       foreach(i, t; ParamTypes)
-        argValues[i] = dynamicArgs[i];
+      {
+        if(i < dynamicArgs.length)
+          argValues[i] = dynamicArgs[i];
+        else if(i < meta.defaults.length && meta.defaults[i])
+          argValues[i] = meta.defaults[i];
+        else
+        {
+          const msg = format("Command '%s' takes %s arguments, got %s", name, N, dynamicArgs.length);
+          throw new Exception(msg);
+        }
+      }
 
       f(argValues);
     }

@@ -56,25 +56,27 @@ void safeMain(string[] args)
 
   auto doc = new Document;
 
-  void addAction(T...)(string name, void function(Document, T) func, string desc)
+  void addAction(T...)(string name, void function(Document, T) func, MetaInfo meta, string desc)
   {
     void action(T args)
     {
       func(doc, args);
     }
 
-    shell.addAction(name, &action, desc);
+    meta.defaults = meta.defaults[1 .. $];
+    shell.addAction(name, &action, meta, desc);
   }
 
-  addAction("load", &cmd_load, "loads an executable binary");
-  addAction("arch", &cmd_setArch, "sets the architecture");
-  addAction("ii", &cmd_symbols, "list symbols");
-  addAction("run", &run, "run an executable binary");
-  addAction("disassemble", &cmd_disassemble, "disassemble");
+  addAction("load", &cmd_load, Meta!cmd_load, "loads an executable binary");
+  addAction("arch", &cmd_setArch, Meta!cmd_setArch, "sets the architecture");
+  addAction("ii", &cmd_symbols, Meta!cmd_symbols, "list symbols");
+  addAction("run", &run, Meta!run, "run an executable binary");
+  addAction("disassemble", &cmd_disassemble, Meta!cmd_disassemble, "disassemble");
 
   auto presenter = new Presenter(doc);
   scope(exit) destroy(presenter);
-  shell.addAction("quit", &presenter.quit, "quit the program");
+
+  shell.addAction("quit", &presenter.quit, Meta!(presenter.quit), "quit the program");
 
   auto view = instanciateView(uiType, presenter);
   scope(exit) destroy(view);
@@ -101,8 +103,15 @@ void safeMain(string[] args)
   view.run();
 }
 
-void cmd_setArch(Document doc, string archName)
+void cmd_setArch(Document doc, string archName = "")
 {
+  if(archName == "")
+  {
+    import std.string;
+    doc.result = [format("Current arch is '%s'", doc.arch)];
+    return;
+  }
+
   arch.g_Architectures.get(archName);
   doc.arch = archName;
 }
