@@ -95,6 +95,7 @@ class ElfLoader : Loader
     }
 
     prog.entryPoint = elf.elf_header.e_entry;
+    prog.symbols[elf.elf_header.e_entry] = "entry0";
   }
 }
 

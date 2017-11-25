@@ -74,6 +74,10 @@ class Presenter : InputSink
                            ins.address,
                            toHex(ins.bytes),
                            ins.asm_);
+
+        if(ins.address in m_doc.symbols)
+          line.text ~= "       ; " ~ m_doc.symbols[ins.address];
+
         r ~= line;
       }
 

@@ -118,9 +118,6 @@ class ConsoleView : IView
 
       ulong attr = ulong.max;
 
-      if(k == LINES / 2)
-        attr = COLOR_PAIR(2);
-
       {
         int pair;
         final switch(line.color)
@@ -136,6 +133,9 @@ class ConsoleView : IView
         case Color.Red: pair = 5;
           break;
         }
+
+        if(k == LINES / 2)
+          pair = 2;
 
         attr = COLOR_PAIR(pair);
       }
