@@ -76,7 +76,7 @@ class Shell
 public:
   this()
   {
-    m_actions["help"] = Action(&help, "shows this help");
+    addAction("help", &help, Meta!help, "shows this help");
   }
 
   void addAction(F)(string name, F f, MetaInfo meta, string desc)
@@ -159,11 +159,11 @@ private:
 
   // actions
 
-  void help(string[] args)
+  void help(string what = "")
   {
-    if(args.length == 1)
+    if(what != "")
     {
-      const name = args[0];
+      auto name = what;
       auto action = getAction(name);
       writefln("%s: %s", name, action.desc);
     }
