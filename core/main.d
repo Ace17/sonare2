@@ -83,13 +83,20 @@ void safeMain(string[] args)
   presenter.shell = shell;
 
   if(args.length > 1)
+  {
     cmd_load(doc, args[1]);
+    cmd_disassemble(doc);
+  }
 
   if(script)
   {
     foreach(line; File(script).byLineCopy)
       shell.processOneLine(line);
   }
+
+  // HACK: first refresh
+  presenter.updateViewModel();
+  presenter.setView(view);
 
   view.run();
 }
