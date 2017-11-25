@@ -176,7 +176,7 @@ private:
     auto action = name in m_actions;
 
     if(!action)
-      throw new Exception("Unknown command '" ~ name ~ "'");
+      throw new Exception("No such command: '" ~ name ~ "'");
 
     return action;
   }
