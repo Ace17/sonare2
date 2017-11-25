@@ -147,11 +147,7 @@ private:
     if(cmdLine == "")
       return;
 
-    string[] argv;
-
-    foreach(arg; splitter(cmdLine))
-      argv ~= arg;
-
+    auto argv = split(cmdLine);
     auto action = getAction(argv[0]);
 
     action.func(argv[1 .. $]);
