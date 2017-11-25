@@ -40,6 +40,19 @@ class Presenter : InputSink
       return m_doc.instructions[index];
     }
 
+    static Color getColor(Type insType)
+    {
+      final switch(insType)
+      {
+      case Type.Jump: return Color.Green;
+      case Type.Call: return Color.Red;
+      case Type.Ret: return Color.Red;
+      case Type.Assign: return Color.Blue;
+      case Type.Op: return Color.Blue;
+      case Type.Unknown: return Color.White;
+      }
+    }
+
     Line[] getLines(int offset)
     {
       Line[] r;
@@ -56,9 +69,7 @@ class Presenter : InputSink
 
         Line line;
 
-        if(ins.type == Type.Jump)
-          line.color = Color.Green;
-
+        line.color = getColor(ins.type);
         line.text = format("0x%.4X:    %-24s %s",
                            ins.address,
                            toHex(ins.bytes),

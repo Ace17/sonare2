@@ -80,8 +80,63 @@ Type getInstructionType(x86_insn id)
 {
   switch(id)
   {
+  case x86_insn.X86_INS_JAE:
+  case x86_insn.X86_INS_JA:
+  case x86_insn.X86_INS_JBE:
+  case x86_insn.X86_INS_JB:
+  case x86_insn.X86_INS_JCXZ:
+  case x86_insn.X86_INS_JECXZ:
+  case x86_insn.X86_INS_JE:
+  case x86_insn.X86_INS_JGE:
+  case x86_insn.X86_INS_JG:
+  case x86_insn.X86_INS_JLE:
+  case x86_insn.X86_INS_JL:
   case x86_insn.X86_INS_JMP:
+  case x86_insn.X86_INS_JNE:
+  case x86_insn.X86_INS_JNO:
+  case x86_insn.X86_INS_JNP:
+  case x86_insn.X86_INS_JNS:
+  case x86_insn.X86_INS_JO:
+  case x86_insn.X86_INS_JP:
+  case x86_insn.X86_INS_JRCXZ:
+  case x86_insn.X86_INS_JS:
     return Type.Jump;
+  case x86_insn.X86_INS_MOV:
+  case x86_insn.X86_INS_MOVABS:
+  case x86_insn.X86_INS_MOVBE:
+  case x86_insn.X86_INS_MOVDDUP:
+  case x86_insn.X86_INS_MOVDQA:
+  case x86_insn.X86_INS_MOVDQU:
+  case x86_insn.X86_INS_MOVHLPS:
+  case x86_insn.X86_INS_MOVHPD:
+  case x86_insn.X86_INS_MOVHPS:
+  case x86_insn.X86_INS_MOVLHPS:
+  case x86_insn.X86_INS_MOVLPD:
+  case x86_insn.X86_INS_MOVLPS:
+  case x86_insn.X86_INS_MOVMSKPD:
+  case x86_insn.X86_INS_MOVMSKPS:
+  case x86_insn.X86_INS_MOVNTDQA:
+  case x86_insn.X86_INS_MOVNTDQ:
+  case x86_insn.X86_INS_MOVNTI:
+  case x86_insn.X86_INS_MOVNTPD:
+  case x86_insn.X86_INS_MOVNTPS:
+  case x86_insn.X86_INS_MOVNTSD:
+  case x86_insn.X86_INS_MOVNTSS:
+  case x86_insn.X86_INS_MOVSB:
+  case x86_insn.X86_INS_MOVSD:
+  case x86_insn.X86_INS_MOVSHDUP:
+  case x86_insn.X86_INS_MOVSLDUP:
+  case x86_insn.X86_INS_MOVSQ:
+  case x86_insn.X86_INS_MOVSS:
+  case x86_insn.X86_INS_MOVSW:
+  case x86_insn.X86_INS_MOVSX:
+  case x86_insn.X86_INS_MOVSXD:
+  case x86_insn.X86_INS_MOVUPD:
+  case x86_insn.X86_INS_MOVUPS:
+  case x86_insn.X86_INS_MOVZX:
+    return Type.Assign;
+  case x86_insn.X86_INS_RET:
+    return Type.Ret;
   default:
     return Type.Unknown;
   }

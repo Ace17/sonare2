@@ -120,8 +120,25 @@ class ConsoleView : IView
 
       if(k == LINES / 2)
         attr = COLOR_PAIR(2);
-      else if(line.color == Color.Green)
-        attr = COLOR_PAIR(3);
+
+      {
+        int pair;
+        final switch(line.color)
+        {
+        case Color.White: pair = 0;
+          break;
+        case Color.Yellow: pair = 2;
+          break;
+        case Color.Green: pair = 3;
+          break;
+        case Color.Blue: pair = 4;
+          break;
+        case Color.Red: pair = 5;
+          break;
+        }
+
+        attr = COLOR_PAIR(pair);
+      }
 
       if(attr != ulong.max)
         wattron(m_txtWindow, attr);
@@ -198,6 +215,8 @@ class ConsoleView : IView
       init_pair(1, COLOR_WHITE, COLOR_BLUE);
       init_pair(2, COLOR_YELLOW, COLOR_BLACK);
       init_pair(3, COLOR_GREEN, COLOR_BLACK);
+      init_pair(4, COLOR_BLUE, COLOR_BLACK);
+      init_pair(5, COLOR_RED, COLOR_BLACK);
 
       CHECK!wbkgd(m_separator, COLOR_PAIR(1));
     }
