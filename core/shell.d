@@ -163,9 +163,8 @@ private:
   {
     if(what != "")
     {
-      auto name = what;
-      auto action = getAction(name);
-      writefln("%s: %s", name, action.desc);
+      auto action = getAction(what);
+      writefln("%s: %s", what, action.desc);
     }
     else
     {
