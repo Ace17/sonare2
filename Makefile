@@ -12,6 +12,7 @@ SRCS:=\
 	core/debugger.d\
 	core/disassemble.d\
 	core/document.d\
+	core/edit_box.d\
 	core/input_sink.d\
 	core/loader.d\
 	core/shell.d\

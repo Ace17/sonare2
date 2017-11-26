@@ -7,29 +7,34 @@
  * License, or (at your option) any later version.
  */
 
-// Derives a ViewModel from a Document,
-// and receives keystrokes from the view.
-// Stores the state of the command line.
+// Computes a ViewModel from a Document.
+// Receives keystrokes from the view,
+// and triggers appropriate actions.
 
 import std.algorithm;
 import std.array;
 import std.string;
 
 import document;
+import edit_box;
 import input_sink;
 import shell;
 import view;
 
-class Presenter : InputSink
+class Presenter : InputSink, EditBox.Sink
 {
   this(Document doc)
   {
     m_doc = doc;
     vm.commandMode = true;
+
+    m_cmd = new EditBox;
+    m_cmd.sink = this;
   }
 
   void updateViewModel()
   {
+    vm.command = m_cmd.text;
     const N = m_sink.getLineCount();
 
     auto getInstruction(int index)
@@ -87,6 +92,30 @@ class Presenter : InputSink
     vm.lines = getLines(m_scrolling);
   }
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Notifications from EditBox.Sink
+  void eof()
+  {
+    quit();
+  }
+
+  void escape()
+  {
+    vm.commandMode = false;
+  }
+
+  string complete(string cmd)
+  {
+    return shell.complete(cmd);
+  }
+
+  void sendCommand(string cmd)
+  {
+    shell.processOneLine(cmd);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
   void quit()
   {
     vm.quit = true;
@@ -109,42 +138,7 @@ class Presenter : InputSink
   {
     if(vm.commandMode)
     {
-      switch(c)
-      {
-      case '\x0D':
-        const cmd = vm.command;
-        vm.command = "";
-        onCommand(cmd);
-        break;
-
-      case '\033':
-        vm.commandMode = false;
-        vm.command = "";
-        break;
-
-      case '\t':
-        tryCompleteCommand();
-        break;
-
-      case '\x08': // Ctrl-H
-
-        if(vm.command.length > 0)
-          vm.command.length--;
-
-        break;
-
-      case '\x15': // Ctrl-U
-        vm.command = "";
-        break;
-
-      case '\x04': // Ctrl-D
-        vm.quit = true;
-        break;
-
-      default:
-        vm.command ~= c;
-        break;
-      }
+      m_cmd.onChar(c);
     }
     else
     {
@@ -175,11 +169,6 @@ class Presenter : InputSink
       updateViewModel();
   }
 
-  void tryCompleteCommand()
-  {
-    vm.command = shell.complete(vm.command);
-  }
-
   void setView(IView sink)
   {
     m_sink = sink;
@@ -190,14 +179,10 @@ class Presenter : InputSink
   ViewModel vm;
   IView m_sink;
   Document m_doc;
+  EditBox m_cmd;
 
 private:
   int m_scrolling;
-
-  void onCommand(string command)
-  {
-    shell.processOneLine(command);
-  }
 }
 
 string toHex(in ubyte[] b)
