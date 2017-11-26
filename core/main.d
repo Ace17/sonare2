@@ -96,9 +96,8 @@ void safeMain(string[] args)
       shell.processOneLine(line);
   }
 
-  // HACK: first refresh
-  presenter.updateViewModel();
-  presenter.setView(view);
+  // HACK: trigger a refresh
+  presenter.onChar('\b');
 
   view.run();
 }

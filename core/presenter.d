@@ -43,16 +43,32 @@ class Presenter : InputSink
     Line[] getLines(int offset)
     {
       Line[] r;
+      bool hasLabel;
 
-      foreach(k; 0 .. N)
+      int srcK = 0;
+
+      foreach(dstK; 0 .. N)
       {
-        const ins = getInstruction(m_scrolling + k);
+        const ins = getInstruction(m_scrolling + srcK);
 
+        // unmapped memory
         if(ins.address == ulong.max)
         {
           r ~= Line("~");
+          srcK++;
           continue;
         }
+
+        // label needed
+        if(ins.address in m_doc.symbols && !hasLabel)
+        {
+          r ~= Line(m_doc.symbols[ins.address] ~ ":", Color.Green);
+          hasLabel = true;
+          continue;
+        }
+
+        srcK++;
+        hasLabel = false;
 
         Line line;
 
@@ -61,9 +77,6 @@ class Presenter : InputSink
                            ins.address,
                            toHex(ins.bytes),
                            ins.asm_);
-
-        if(ins.address in m_doc.symbols)
-          line.text ~= "       ; " ~ m_doc.symbols[ins.address];
 
         r ~= line;
       }
