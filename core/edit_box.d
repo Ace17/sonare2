@@ -11,6 +11,50 @@
 
 import std.typecons;
 
+import assertion;
+
+unittest
+{
+  auto b = new EditBox;
+  b.onChar('H');
+  b.onChar('E');
+  b.onChar('L');
+  b.onChar('L');
+  b.onChar('O');
+  assertEquals("HELLO", b.text);
+}
+
+unittest
+{
+  auto b = new EditBox;
+  b.onChar('H');
+  b.onChar('E');
+  b.onChar('L');
+  b.onChar('L');
+  b.onChar('O');
+  b.onChar('\x08'); // backspace
+  assertEquals("HELL", b.text);
+}
+
+unittest
+{
+  auto b = new EditBox;
+  b.onChar('l');
+  b.onChar('s');
+  b.onChar('\x15'); // Ctrl-U
+  assertEquals("", b.text);
+}
+
+unittest
+{
+  auto b = new EditBox;
+  b.onChar('r');
+  b.onChar('u');
+  b.onChar('n');
+  b.onChar('\x0D'); // 'Enter' key
+  assertEquals("", b.text);
+}
+
 class EditBox
 {
   interface Sink
