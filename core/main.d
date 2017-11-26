@@ -82,7 +82,7 @@ void safeMain(string[] args)
   scope(exit) destroy(view);
 
   presenter.setView(view);
-  presenter.shell = shell;
+  presenter.m_shell = shell;
 
   if(args.length > 1)
   {

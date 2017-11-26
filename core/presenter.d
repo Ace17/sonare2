@@ -106,12 +106,12 @@ class Presenter : InputSink, EditBox.Sink
 
   string complete(string cmd)
   {
-    return shell.complete(cmd);
+    return m_shell.complete(cmd);
   }
 
   void sendCommand(string cmd)
   {
-    shell.processOneLine(cmd);
+    m_shell.processOneLine(cmd);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -172,10 +172,9 @@ class Presenter : InputSink, EditBox.Sink
   void setView(IView sink)
   {
     m_sink = sink;
-    m_sink.refresh(vm);
   }
 
-  Shell shell;
+  Shell m_shell;
   ViewModel vm;
   IView m_sink;
   Document m_doc;
