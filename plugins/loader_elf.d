@@ -10,7 +10,6 @@
 // Loader for ELF files
 
 import std.conv;
-import std.stream;
 import std.string;
 
 import document;
@@ -271,11 +270,55 @@ class CRawSection
   SByteInfo[] info;
 }
 
+class Stream
+{
+  this(const(ubyte)[] data_)
+  {
+    data = data_;
+  }
+
+  void readExact(void* dst, size_t n)
+  {
+    auto bytes = cast(ubyte*)dst;
+    foreach(k; 0 .. n )
+      bytes[k] = nextByte();
+  }
+
+  void read(ubyte[] s)
+  {
+    readExact(s.ptr, s.length);
+  }
+
+  ubyte getc()
+  {
+    return nextByte();
+  }
+
+  ubyte nextByte()
+  {
+    return data[pos++];
+  }
+
+  void position(int pos_)
+  {
+    pos = pos_;
+  }
+
+  int position()
+  {
+    return pos;
+  }
+
+  int pos;
+
+  const(ubyte)[] data;
+}
+
 class ElfBinary
 {
   this(const ubyte[] data)
   {
-    auto f = new MemoryStream(data.dup);
+    auto f = new Stream(data);
     Parse(f);
   }
 
@@ -686,28 +729,28 @@ enum SHT
 //
 // I/O functions
 //
-Elf32_Half get_Elf32_Half(InputStream s)
+Elf32_Half get_Elf32_Half(Stream s)
 {
   Elf32_Half w;
   s.readExact(&w, 2);
   return w;
 }
 
-Elf32_Word get_Elf32_Word(InputStream s)
+Elf32_Word get_Elf32_Word(Stream s)
 {
   Elf32_Word w;
   s.readExact(&w, 4);
   return w;
 }
 
-Elf32_Addr get_Elf32_Addr(InputStream s)
+Elf32_Addr get_Elf32_Addr(Stream s)
 {
   Elf32_Addr w;
   s.readExact(&w, 4);
   return w;
 }
 
-Elf32_Off get_Elf32_Off(InputStream s)
+Elf32_Off get_Elf32_Off(Stream s)
 {
   Elf32_Off w;
   s.readExact(&w, 4);
