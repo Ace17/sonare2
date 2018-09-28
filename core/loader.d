@@ -10,6 +10,7 @@
 // Load binary use case
 
 import std.file;
+import std.stdio;
 
 import document;
 import registry;
@@ -19,7 +20,10 @@ void cmd_load(Document doc, string path)
   auto name = doc.format;
 
   if(name == "")
+  {
     name = guessFormat(path);
+    writefln("Using format: '%s'", name);
+  }
 
   auto loader = g_Loaders.get(name);
   loader.load(doc, path);
