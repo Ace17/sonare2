@@ -35,15 +35,18 @@ class ElfLoader : Loader
   void load(Document prog, string path)
   {
     const rawBytes = cast(ubyte[])std.file.read(path);
-    auto elf = new ElfBinary(rawBytes);
+    auto elf = parse(rawBytes);
     prog.bits = 32;
     switch(elf.elf_header.e_machine)
     {
-    case EM_386: prog.arch = "i386";
+    case EM_386:
+      prog.arch = "i386";
       break;
-    case EM_ARM: prog.arch = "arm";
+    case EM_ARM:
+      prog.arch = "arm";
       break;
-    default: throw new Exception("ELF: unknown machine type");
+    default:
+      throw new Exception(format("ELF: unknown machine type: %d", elf.elf_header.e_machine));
     }
 
     gatherAllSymbols(prog, elf);
@@ -280,7 +283,8 @@ class Stream
   void readExact(void* dst, size_t n)
   {
     auto bytes = cast(ubyte*)dst;
-    foreach(k; 0 .. n )
+
+    foreach(k; 0 .. n)
       bytes[k] = nextByte();
   }
 
@@ -314,14 +318,15 @@ class Stream
   const(ubyte)[] data;
 }
 
+ElfBinary parse(const ubyte[] data)
+{
+  auto r = new ElfBinary();
+  r.Parse(new Stream(data));
+  return r;
+}
+
 class ElfBinary
 {
-  this(const ubyte[] data)
-  {
-    auto f = new Stream(data);
-    Parse(f);
-  }
-
   CStringTable[] string_tables;
   CSymbolTable[] symbol_tables;
   CRelocationTable[] reloc_table;
@@ -340,7 +345,7 @@ class ElfBinary
         return t;
     }
 
-    assert(0);
+    throw new Exception("String table not found");
   }
 
   CSymbolTable GetSymbolTable(SECTION_IDX section_index)
@@ -351,7 +356,7 @@ class ElfBinary
         return t;
     }
 
-    assert(0);
+    throw new Exception("Symbol table not found");
   }
 
   string GetSectionName(SECTION_IDX section_index)
