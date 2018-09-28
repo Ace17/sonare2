@@ -26,7 +26,7 @@ class ElfLoader : Loader
   {
     const data = cast(ubyte[])std.file.read(path);
 
-    if(data[0 .. 8] !=[0x7f, 0x45, 0x4c, 0x46, 0x01, 0x01, 0x01, 0x00])
+    if(data[0 .. 4] !=[0x7f, 'E', 'L', 'F'])
       return false;
 
     return true;
@@ -36,24 +36,25 @@ class ElfLoader : Loader
   {
     const rawBytes = cast(ubyte[])std.file.read(path);
     auto elf = parse(rawBytes);
-    prog.bits = 32;
-    switch(elf.elf_header.e_machine)
+    switch(elf.fileHeader.e_machine)
     {
     case EM_386:
       prog.arch = "i386";
+      prog.bits = 32;
       break;
     case EM_ARM:
       prog.arch = "arm";
+      prog.bits = 32;
       break;
     default:
-      throw new Exception(format("ELF: unknown machine type: %d", elf.elf_header.e_machine));
+      throw new Exception(format("ELF: unknown machine type: %d", elf.fileHeader.e_machine));
     }
 
     gatherAllSymbols(prog, elf);
     mapSections(prog, elf);
 
-    prog.entryPoint = elf.elf_header.e_entry;
-    prog.symbols[elf.elf_header.e_entry] = "entry0";
+    prog.entryPoint = elf.fileHeader.e_entry;
+    prog.symbols[elf.fileHeader.e_entry] = "entry0";
   }
 
 private:
@@ -61,7 +62,7 @@ private:
   {
     foreach(ref raw_sect; elf.raw_sections)
     {
-      const sh = &elf.section_header[raw_sect.section_index];
+      const sh = &elf.sectionHeaders[raw_sect.section_index];
 
       // skip reserved sections
       if(sh.sh_type == SHT_NULL)
@@ -126,7 +127,7 @@ class CStringTable
 }
 
 // type-safe version of ELF standard structure
-struct SElfHeader
+struct FileHeader
 {
   ubyte[EI_NIDENT] e_ident; /* Magic number and other info */
   ET e_type;              /* Object file type */
@@ -145,7 +146,7 @@ struct SElfHeader
 }
 
 // type-safe version of ELF standard structure
-struct SElfSectionHeader
+struct SectionHeader
 {
   STR_TAB_IDX sh_name;      // Section name (string tbl index)
   SHT sh_type;      // Section type
@@ -303,39 +304,40 @@ class Stream
     return data[pos++];
   }
 
-  void position(int pos_)
+  void position(long pos_)
   {
     pos = pos_;
   }
 
-  int position()
+  long position()
   {
     return pos;
   }
 
-  int pos;
+  long pos;
 
   const(ubyte)[] data;
 }
 
 ElfBinary parse(const ubyte[] data)
 {
-  auto r = new ElfBinary();
-  r.Parse(new Stream(data));
+  auto r = new ElfBinary;
+  r.parse(data);
   return r;
 }
 
 class ElfBinary
 {
+  int bits;
   CStringTable[] string_tables;
   CSymbolTable[] symbol_tables;
   CRelocationTable[] reloc_table;
   CProgbitsSection[] progbits_sections;
   CRawSection[] raw_sections;
 
-  SElfHeader elf_header;
-  SElfSectionHeader[] section_header;
-  Elf32_Phdr[] program_header;
+  FileHeader fileHeader;
+  SectionHeader[] sectionHeaders;
+  ProgramHeader[] programHeaders;
 
   CStringTable GetStringTable(SECTION_IDX section_index)
   {
@@ -361,8 +363,8 @@ class ElfBinary
 
   string GetSectionName(SECTION_IDX section_index)
   {
-    STR_TAB_IDX string_index = section_header[section_index].sh_name;
-    return GetStringTable(elf_header.e_shstrndx).GetString(string_index);
+    STR_TAB_IDX string_index = sectionHeaders[section_index].sh_name;
+    return GetStringTable(fileHeader.e_shstrndx).GetString(string_index);
   }
 
   string GetSymbolName(SECTION_IDX symtab_sh_idx, SYM_TAB_IDX sym_idx)
@@ -391,7 +393,7 @@ class ElfBinary
   }
 
 private:
-  void ParseElfHeader(Stream f, ref SElfHeader hdr)
+  void ParseElfHeader(Stream f, ref FileHeader hdr)
   {
     f.readExact(hdr.e_ident.ptr, EI_NIDENT);
 
@@ -415,9 +417,9 @@ private:
     assert(hdr.e_version == EV_CURRENT);
   }
 
-  SElfSectionHeader ParseSectionHeader(Stream f)
+  SectionHeader ParseSectionHeader(Stream f)
   {
-    SElfSectionHeader hdr;
+    SectionHeader hdr;
     hdr.sh_name = cast(STR_TAB_IDX) get_Elf32_Word(f);
     hdr.sh_type = cast(SHT) get_Elf32_Word(f);
     hdr.sh_flags = get_Elf32_Word(f);
@@ -435,40 +437,40 @@ private:
   void ParseProgramHeader(Stream f)
   {
     // parse program header
-    assert(elf_header.e_phoff != 0);
+    assert(fileHeader.e_phoff != 0);
 
-    program_header.length = elf_header.e_phnum + 1;
+    programHeaders.length = fileHeader.e_phnum + 1;
 
-    for(int i = 0; i <= elf_header.e_phnum; ++i)
+    for(int i = 0; i <= fileHeader.e_phnum; ++i)
     {
-      f.position(elf_header.e_phoff + i * elf_header.e_phentsize);
-      program_header[i].p_type = get_Elf32_Word(f);
-      program_header[i].p_offset = get_Elf32_Off(f);
-      program_header[i].p_vaddr = get_Elf32_Addr(f);
-      program_header[i].p_paddr = get_Elf32_Addr(f);
-      program_header[i].p_filesz = get_Elf32_Word(f);
-      program_header[i].p_memsz = get_Elf32_Word(f);
-      program_header[i].p_flags = get_Elf32_Word(f);
-      program_header[i].p_align = get_Elf32_Word(f);
+      f.position(fileHeader.e_phoff + i * fileHeader.e_phentsize);
+      programHeaders[i].p_type = get_Elf32_Word(f);
+      programHeaders[i].p_offset = get_Elf32_Off(f);
+      programHeaders[i].p_vaddr = get_Elf32_Addr(f);
+      programHeaders[i].p_paddr = get_Elf32_Addr(f);
+      programHeaders[i].p_filesz = get_Elf32_Word(f);
+      programHeaders[i].p_memsz = get_Elf32_Word(f);
+      programHeaders[i].p_flags = get_Elf32_Word(f);
+      programHeaders[i].p_align = get_Elf32_Word(f);
     }
   }
 
   void ParseSectionHeaders(Stream f)
   {
     // parse section headers
-    assert(elf_header.e_shoff != 0);
+    assert(fileHeader.e_shoff != 0);
 
-    for(int i = 0; i < elf_header.e_shnum; ++i)
+    for(int i = 0; i < fileHeader.e_shnum; ++i)
     {
-      f.position(elf_header.e_shoff + i * elf_header.e_shentsize);
-      section_header ~= ParseSectionHeader(f);
+      f.position(fileHeader.e_shoff + i * fileHeader.e_shentsize);
+      sectionHeaders ~= ParseSectionHeader(f);
     }
   }
 
   // Parses input stream and fills internal buffers with raw
   void ParseRawSections(Stream f)
   {
-    foreach(SECTION_IDX i, sh; section_header)
+    foreach(SECTION_IDX i, sh; sectionHeaders)
     {
       CRawSection raw_sect = new CRawSection;
       raw_sect.section_index = i;
@@ -489,7 +491,7 @@ private:
   void ParseStringTables(Stream f)
   {
     // parse string tables
-    foreach(SECTION_IDX i, sh; section_header)
+    foreach(SECTION_IDX i, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_STRTAB)
         continue;
@@ -524,7 +526,7 @@ private:
 
   void ParseSymbolTables(Stream f)
   {
-    foreach(SECTION_IDX i, sh; section_header)
+    foreach(SECTION_IDX i, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_SYMTAB && sh.sh_type != SHT_DYNSYM)
         continue;
@@ -571,7 +573,7 @@ private:
   void ParseRelocationSections(Stream f)
   {
     // parse relocation sections
-    foreach(SECTION_IDX i, sh; section_header)
+    foreach(SECTION_IDX i, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_REL)
         continue;
@@ -627,7 +629,7 @@ private:
   void ParseCode(Stream f)
   {
     // parse progbits sections
-    foreach(SECTION_IDX i, sh; section_header)
+    foreach(SECTION_IDX i, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_PROGBITS)
         continue;
@@ -643,11 +645,12 @@ private:
     }
   }
 
-  void Parse(Stream f)
+  void parse(const ubyte[] data)
   {
-    ParseElfHeader(f, elf_header);
+    auto f = new Stream(data);
+    ParseElfHeader(f, fileHeader);
 
-    if(elf_header.e_phoff != 0)
+    if(fileHeader.e_phoff != 0)
       ParseProgramHeader(f);
 
     ParseSectionHeaders(f);
@@ -1275,7 +1278,7 @@ struct Elf64_Rela
 
 /* Program segment header.  */
 
-struct Elf32_Phdr
+struct ProgramHeader
 {
   Elf32_Word p_type;     /* Segment type */
   Elf32_Off p_offset;   /* Segment file offset */
@@ -2260,7 +2263,7 @@ const R_MIPS_GLOB_DAT = 51;
 /* Keep this the last entry.  */
 const R_MIPS_NUM = 52;
 
-/* Legal values for p_type field of Elf32_Phdr.  */
+/* Legal values for p_type field of ProgramHeader.  */
 
 const PT_MIPS_REGINFO = 0x70000000;  /* Register usage information */
 const PT_MIPS_RTPROC = 0x70000001;  /* Runtime procedure table. */
@@ -2539,7 +2542,7 @@ const R_PARISC_TLS_TPREL64 = R_PARISC_TPREL64;
 
 const R_PARISC_HIRESERVE = 255;
 
-/* Legal values for p_type field of Elf32_Phdr/Elf64_Phdr.  */
+/* Legal values for p_type field of ProgramHeader/Elf64_Phdr.  */
 
 const PT_HP_TLS = (PT_LOOS + 0x0);
 const PT_HP_CORE_NONE = (PT_LOOS + 0x1);
@@ -2560,7 +2563,7 @@ const PT_HP_STACK = (PT_LOOS + 0x14);
 const PT_PARISC_ARCHEXT = 0x70000000;
 const PT_PARISC_UNWIND = 0x70000001;
 
-/* Legal values for p_flags field of Elf32_Phdr/Elf64_Phdr.  */
+/* Legal values for p_flags field of ProgramHeader/Elf64_Phdr.  */
 
 const PF_PARISC_SBP = 0x08000000;
 
