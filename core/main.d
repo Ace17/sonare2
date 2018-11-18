@@ -39,8 +39,10 @@ void safeMain(string[] args)
 {
   string script;
   string uiType = "console";
+  string binFmt;
 
   auto helpInfo = getopt(args,
+                         "f|format", "input format (raw, elf, etc.)", &binFmt,
                          "u|ui", "UI to use (console, sdl)", &uiType,
                          "i|script", "script file to run", &script);
 
@@ -86,6 +88,7 @@ void safeMain(string[] args)
 
   if(args.length > 1)
   {
+    doc.format = binFmt;
     cmd_load(doc, args[1]);
     cmd_disassemble(doc);
   }
