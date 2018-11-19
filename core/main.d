@@ -40,9 +40,13 @@ void safeMain(string[] args)
   string script;
   string uiType = "console";
   string binFmt;
+  string binArch;
+  uint baseAddress;
 
   auto helpInfo = getopt(args,
                          "f|format", "input format (raw, elf, etc.)", &binFmt,
+                         "a|arch", "input architecture (arm, x86, etc.)", &binArch,
+                         "m|base-address", "base address", &baseAddress,
                          "u|ui", "UI to use (console, sdl)", &uiType,
                          "i|script", "script file to run", &script);
 
@@ -89,6 +93,8 @@ void safeMain(string[] args)
   if(args.length > 1)
   {
     doc.format = binFmt;
+    doc.arch = binArch;
+    doc.address = baseAddress;
     cmd_load(doc, args[1]);
     cmd_disassemble(doc);
   }
