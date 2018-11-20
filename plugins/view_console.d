@@ -154,7 +154,6 @@ class ConsoleView : IView
     }
     else
     {
-      wclear(m_cmdWindow);
       mvwaddstr(m_cmdWindow, 0, 0, toStringz(" " ~ m_viewModel.command));
       curs_set(0);
     }
