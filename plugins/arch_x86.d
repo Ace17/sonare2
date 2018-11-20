@@ -20,10 +20,12 @@ import document;
 
 static this()
 {
-  g_Architectures.register("i386", new i386Architecture);
+  g_Architectures.register("x86_16", new x86Architecture !16);
+  g_Architectures.register("x86_32", new x86Architecture !32);
+  g_Architectures.register("x86_64", new x86Architecture !64);
 }
 
-class i386Architecture : Architecture
+class x86Architecture(int bits) : Architecture
 {
   void disassemble(Document doc)
   {
@@ -38,7 +40,7 @@ class i386Architecture : Architecture
       }
     }
 
-    const mode = getMode(doc.bits);
+    const mode = getMode(bits);
 
     csh handle;
 

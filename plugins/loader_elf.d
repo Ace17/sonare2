@@ -39,12 +39,10 @@ class ElfLoader : Loader
     switch(elf.fileHeader.e_machine)
     {
     case EM_386:
-      prog.arch = "i386";
-      prog.bits = 32;
+      prog.arch = "x86_32";
       break;
     case EM_ARM:
-      prog.arch = "arm";
-      prog.bits = 32;
+      prog.arch = "arm_32";
       break;
     default:
       throw new Exception(format("ELF: unknown machine type: %d", elf.fileHeader.e_machine));

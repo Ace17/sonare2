@@ -34,8 +34,7 @@ class BootSectorLoader : Loader
 
   void load(Document doc, string path)
   {
-    doc.arch = "i386";
-    doc.bits = 16;
+    doc.arch = "x86_16";
     doc.address = 0x7c00;
     doc.data = cast(ubyte[])std.file.read(path);
   }

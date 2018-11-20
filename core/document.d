@@ -10,7 +10,6 @@
 
 class Document
 {
-  int bits; // 16, 32, 64
   string format;
   string arch;
 

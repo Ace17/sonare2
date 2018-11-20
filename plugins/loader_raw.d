@@ -25,10 +25,7 @@ class RawLoader : Loader
   void load(Document doc, string path)
   {
     if(doc.arch == "")
-      doc.arch = "i386";
-
-    if(doc.bits == 0)
-      doc.bits = 64;
+      doc.arch = "x86_64";
 
     doc.data = cast(ubyte[])std.file.read(path);
   }

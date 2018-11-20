@@ -19,7 +19,7 @@ import document;
 
 static this()
 {
-  g_Architectures.register("arm", new ArmArchitecture);
+  g_Architectures.register("arm_32", new ArmArchitecture);
 }
 
 class ArmArchitecture : Architecture
