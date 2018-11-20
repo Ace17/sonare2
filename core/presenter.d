@@ -217,7 +217,12 @@ const(Char)[] formatExpression(in Expr e)
 {
   if(auto n = cast(NumberExpr)e)
   {
-    return colorize(format("0x%X", n.value), Color.Yellow);
+    string fmt = "0x%X";
+
+    if(n.value == 0 || n.value == 1)
+      fmt = "%s";
+
+    return colorize(format(fmt, n.value), Color.Yellow);
   }
   else if(auto i = cast(IdentifierExpr)e)
   {
