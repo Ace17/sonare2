@@ -25,14 +25,11 @@ class JaguarArchitecture(bool isGpu) : Architecture
 
     while(i < cast(int)doc.data.length)
     {
-      string buffer;
-      auto instruction = dasmInstruction(isGpu, buffer, pc, doc.data[i .. $]);
-      auto size = instruction.bytes.length;
+      auto instruction = dasmInstruction(isGpu, pc, doc.data[i .. $]);
+      const size = instruction.bytes.length;
 
       if(!size)
         break;
-
-      instruction.asm_ = buffer;
 
       doc.instructions ~= instruction;
 
@@ -50,48 +47,40 @@ int notZero(int input)
 immutable condition =
 [
   "",
-  "nz,",
-  "z,",
-  "?,",
-  "nc,",
-  "nc nz,",
-  "nc z,",
-  "?,",
-  "c,",
-  "c nz,",
-  "c z,",
-  "?,",
-  "?,",
-  "?,",
-  "?,",
-  "?,",
-  "?,",
-  "?,",
-  "?,",
-  "?,",
-  "nn,",
-  "nn nz,",
-  "nn z,",
-  "?,",
-  "n,",
-  "n nz,",
-  "n z,",
-  "?,",
-  "?,",
-  "?,",
-  "?,",
-  "never,"
+  "nz",
+  "z",
+  "?",
+  "nc",
+  "nc/nz",
+  "nc/z",
+  "?",
+  "c",
+  "c/nz",
+  "c/z",
+  "?",
+  "?",
+  "?",
+  "?",
+  "?",
+  "?",
+  "?",
+  "?",
+  "?",
+  "nn",
+  "nn/nz",
+  "nn/z",
+  "?",
+  "n",
+  "n/nz",
+  "n/z",
+  "?",
+  "?",
+  "?",
+  "?",
+  "never"
 ];
 
-string formatSigned16bit(int val)
-{
-  if(val < 0)
-    return format("-$%x", -val);
-  else
-    return format("$%x", val);
-}
-
-static Instruction dasmInstruction(bool isGpu, out string text, uint pc, const ubyte[] code)
+static Instruction dasmInstruction(bool isGpu, uint pc, const ubyte[] code)
 {
   Instruction r;
   r.address = pc;
@@ -110,226 +99,342 @@ static Instruction dasmInstruction(bool isGpu, out string text, uint pc, const u
   auto const reg1 = (op >> 5) & 0b11111;
   auto const reg2 = (op >> 0) & 0b11111;
 
+  Expr R(int id)
+  {
+    auto r = new IdentifierExpr;
+    r.name = format("r%s", id);
+    return r;
+  }
+
+  Expr deref(Expr e)
+  {
+    auto r = new DerefExpr;
+    r.sub = e;
+    return r;
+  }
+
+  Expr val(int value)
+  {
+    auto r = new NumberExpr;
+    r.value = value;
+    return r;
+  }
+
+  Expr add(Expr a, Expr b)
+  {
+    auto r = new AddExpr;
+    r.a = a;
+    r.b = b;
+    return r;
+  }
+
   pc += 2;
   switch(opCode)
   {
   case 0:
-    text = format("add     r%d,r%d", reg1, reg2);
+    r.mnemonic = "add";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 1:
-    text = format("addc    r%d,r%d", reg1, reg2);
+    r.mnemonic = "addc";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 2:
-    text = format("addq    $%x,r%d", notZero(reg1), reg2);
+    r.mnemonic = "addq";
+    r.operands = [val(notZero(reg1)), R(reg2)];
     r.type = Type.Op;
     break;
   case 3:
-    text = format("addqt   $%x,r%d", notZero(reg1), reg2);
+    r.mnemonic = "addqt";
+    r.operands = [val(notZero(reg1)), R(reg2)];
     r.type = Type.Op;
     break;
   case 4:
-    text = format("sub     r%d,r%d", reg1, reg2);
+    r.mnemonic = "sub";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 5:
-    text = format("subc    r%d,r%d", reg1, reg2);
+    r.mnemonic = "subc";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 6:
-    text = format("subq    $%x,r%d", notZero(reg1), reg2);
+    r.mnemonic = "subq";
+    r.operands = [val(notZero(reg1)), R(reg2)];
     r.type = Type.Op;
     break;
   case 7:
-    text = format("subqt   $%x,r%d", notZero(reg1), reg2);
+    r.mnemonic = "subqt";
+    r.operands = [val(notZero(reg1)), R(reg2)];
     r.type = Type.Op;
     break;
   case 8:
-    text = format("neg     r%d", reg2);
+    r.mnemonic = "neg";
+    r.operands = [R(reg2)];
     r.type = Type.Op;
     break;
   case 9:
-    text = format("and     r%d,r%d", reg1, reg2);
+    r.mnemonic = "and";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 10:
-    text = format("or      r%d,r%d", reg1, reg2);
+    r.mnemonic = "or";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 11:
-    text = format("xor     r%d,r%d", reg1, reg2);
+    r.mnemonic = "xor";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 12:
-    text = format("not     r%d", reg2);
+    r.mnemonic = "not";
+    r.operands = [R(reg2)];
     r.type = Type.Op;
     break;
   case 13:
-    text = format("btst    $%x,r%d", reg1, reg2);
+    r.mnemonic = "btst";
+    r.operands = [val(reg1), R(reg2)];
     break;
   case 14:
-    text = format("bset    $%x,r%d", reg1, reg2);
+    r.mnemonic = "bset";
+    r.operands = [val(reg1), R(reg2)];
     break;
   case 15:
-    text = format("bclr    $%x,r%d", reg1, reg2);
+    r.mnemonic = "bclr";
+    r.operands = [val(reg1), R(reg2)];
     break;
   case 16:
-    text = format("mult    r%d,r%d", reg1, reg2);
+    r.mnemonic = "mult";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 17:
-    text = format("imult   r%d,r%d", reg1, reg2);
+    r.mnemonic = "imult";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 18:
-    text = format("imultn  r%d,r%d", reg1, reg2);
+    r.mnemonic = "imultn";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Op;
     break;
   case 19:
-    text = format("resmac  r%d", reg2);
+    r.mnemonic = "resmac";
+    r.operands = [R(reg2)];
     break;
   case 20:
-    text = format("imacn   r%d,r%d", reg1, reg2);
+    r.mnemonic = "imacn";
+    r.operands = [R(reg1), R(reg2)];
     break;
   case 21:
-    text = format("div     r%d,r%d", reg1, reg2);
+    r.mnemonic = "div";
+    r.operands = [R(reg1), R(reg2)];
+    r.type = Type.Op;
     break;
   case 22:
-    text = format("abs     r%d", reg2);
+    r.mnemonic = "abs";
+    r.operands = [R(reg2)];
+    r.type = Type.Op;
     break;
   case 23:
-    text = format("sh      r%d,r%d", reg1, reg2);
+    r.mnemonic = "sh";
+    r.operands = [R(reg1), R(reg2)];
+    r.type = Type.Op;
     break;
   case 24:
-    text = format("shlq    $%x,r%d", 32 - notZero(reg1), reg2);
+    r.mnemonic = "shlq";
+    r.operands = [val(32 - notZero(reg1)), R(reg2)];
+    r.type = Type.Op;
     break;
   case 25:
-    text = format("shrq    $%x,r%d", notZero(reg1), reg2);
+    r.mnemonic = "shrq";
+    r.operands = [val(notZero(reg1)), R(reg2)];
+    r.type = Type.Op;
     break;
   case 26:
-    text = format("sha     r%d,r%d", reg1, reg2);
+    r.mnemonic = "sha";
+    r.operands = [R(reg1), R(reg2)];
+    r.type = Type.Op;
     break;
   case 27:
-    text = format("sharq   $%x,r%d", notZero(reg1), reg2);
+    r.mnemonic = "sharq";
+    r.operands = [val(notZero(reg1)), R(reg2)];
+    r.type = Type.Op;
     break;
   case 28:
-    text = format("ror     r%d,r%d", reg1, reg2);
+    r.mnemonic = "ror";
+    r.operands = [R(reg1), R(reg2)];
+    r.type = Type.Op;
     break;
   case 29:
-    text = format("rorq    $%x,r%d", notZero(reg1), reg2);
+    r.mnemonic = "rorq";
+    r.operands = [val(notZero(reg1)), R(reg2)];
+    r.type = Type.Op;
     break;
   case 30:
-    text = format("cmp     r%d,r%d", reg1, reg2);
+    r.mnemonic = "cmp";
+    r.operands = [R(reg1), R(reg2)];
+    r.type = Type.Op;
     break;
   case 31:
-    text = format("cmpq    %s,r%d", formatSigned16bit(cast(short)(reg1 << 11) >> 11), reg2);
+    r.mnemonic = "cmpq";
+    r.operands = [val(cast(short)(reg1 << 11) >> 11), R(reg2)];
+    r.type = Type.Op;
     break;
   case 32:
 
     if(isGpu)
-      text = format("sat8    r%d", reg2);
+    {
+      r.mnemonic = "sat8";
+      r.operands = [R(reg2)];
+    }
     else
-      text = format("subqmod $%x,r%d", notZero(reg1), reg2);
+    {
+      r.mnemonic = "subqmod";
+      r.operands = [val(notZero(reg1)), R(reg2)];
+    }
 
     break;
   case 33:
 
     if(isGpu)
-      text = format("sat16   r%d", reg2);
+    {
+      r.mnemonic = "sat16";
+      r.operands = [R(reg2)];
+    }
     else
-      text = format("sat16s  r%d", reg2);
+    {
+      r.mnemonic = "sat16s";
+      r.operands = [R(reg2)];
+    }
 
     break;
   case 34:
-    text = format("move    r%d,r%d", reg1, reg2);
+    r.mnemonic = "move";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Assign;
     break;
   case 35:
-    text = format("moveq   %d,r%d", reg1, reg2);
+    r.mnemonic = "moveq";
+    r.operands = [val(reg1), R(reg2)];
     r.type = Type.Assign;
     break;
   case 36:
-    text = format("moveta  r%d,r%d", reg1, reg2);
+    r.mnemonic = "moveta";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Assign;
     break;
   case 37:
-    text = format("movefa  r%d,r%d", reg1, reg2);
+    r.mnemonic = "movefa";
+    r.operands = [R(reg1), R(reg2)];
     r.type = Type.Assign;
     break;
   case 38:
     {
       auto low = read16_BE() << 0;
       auto high = read16_BE() << 16;
-      text = format("movei   $%x,r%d", low | high, reg2);
+      r.mnemonic = "movei";
+      r.operands = [val(low | high), R(reg2)];
       r.type = Type.Assign;
       break;
     }
   case 39:
-    text = format("loadb   (r%d),r%d", reg1, reg2);
+    r.mnemonic = "loadb";
+    r.operands = [deref(R(reg1)), R(reg2)];
     r.type = Type.Assign;
     break;
   case 40:
-    text = format("loadw   (r%d),r%d", reg1, reg2);
+    r.mnemonic = "loadw";
+    r.operands = [deref(R(reg1)), R(reg2)];
     r.type = Type.Assign;
     break;
   case 41:
-    text = format("load    (r%d),r%d", reg1, reg2);
+    r.mnemonic = "load";
+    r.operands = [deref(R(reg1)), R(reg2)];
     r.type = Type.Assign;
     break;
   case 42:
 
     if(isGpu)
-      text = format("loadp   (r%d),r%d", reg1, reg2);
+    {
+      r.mnemonic = "loadp";
+      r.operands = [deref(R(reg1)), R(reg2)];
+    }
     else
-      text = format("sat32s  r%d", reg2);
+    {
+      r.mnemonic = "sat32s";
+      r.operands = [R(reg2)];
+    }
 
     r.type = Type.Assign;
     break;
   case 43:
-    text = format("load    (r14+$%x),r%d", notZero(reg1) * 4, reg2);
+    r.mnemonic = "load";
+    r.operands = [deref(add(R(14), val(notZero(reg1) * 4))), R(reg2)];
     r.type = Type.Assign;
     break;
   case 44:
-    text = format("load    (r15+$%x),r%d", notZero(reg1) * 4, reg2);
+    r.mnemonic = "load";
+    r.operands = [deref(add(R(15), val(notZero(reg1) * 4))), R(reg2)];
     r.type = Type.Assign;
     break;
   case 45:
-    text = format("storeb  r%d,(r%d)", reg2, reg1);
+    r.mnemonic = "storeb";
+    r.operands = [(R(reg2)), deref(R(reg1))];
     r.type = Type.Assign;
     break;
   case 46:
-    text = format("storew  r%d,(r%d)", reg2, reg1);
+    r.mnemonic = "storew";
+    r.operands = [(R(reg2)), deref(R(reg1))];
     r.type = Type.Assign;
     break;
   case 47:
-    text = format("store   r%d,(r%d)", reg2, reg1);
+    r.mnemonic = "store";
+    r.operands = [(R(reg2)), deref(R(reg1))];
     r.type = Type.Assign;
     break;
   case 48:
 
     if(isGpu)
     {
-      text = format("storep  r%d,(r%d)", reg2, reg1);
+      r.mnemonic = "storep";
+      r.operands = [(R(reg2)), deref(R(reg1))];
       r.type = Type.Assign;
     }
     else
     {
-      text = format("mirror  r%d", reg2);
+      r.mnemonic = "mirror";
+      r.operands = [R(reg2)];
     }
 
     break;
   case 49:
-    text = format("store   r%d,(r14+$%x)", reg2, notZero(reg1) * 4);
+    r.mnemonic = "store";
+    r.operands = [R(reg2), deref(add(R(14), val(notZero(reg1) * 4)))];
+    r.type = Type.Assign;
     break;
   case 50:
-    text = format("store   r%d,(r15+$%x)", reg2, notZero(reg1) * 4);
+    r.mnemonic = "store";
+    r.operands = [R(reg2), deref(add(R(15), val(notZero(reg1) * 4)))];
+    r.type = Type.Assign;
     break;
   case 51:
-    text = format("move    pc,r%d", reg2);
-    break;
+    {
+      auto pcReg = new IdentifierExpr;
+      pcReg.name = "pc";
+      r.mnemonic = "move";
+      r.operands = [pcReg, R(reg2)];
+      r.type = Type.Assign;
+      break;
+    }
   case 52:
-    text = format("jump    %s(r%d)", condition[reg2], reg1);
+    r.mnemonic = "jump" ~ condition[reg2];
+    r.operands = [deref(R(reg1))];
     r.type = Type.Jump;
     break;
   case 53:
@@ -341,45 +446,60 @@ static Instruction dasmInstruction(bool isGpu, out string text, uint pc, const u
 
       offset >>= 2;
 
-      text = format("jr      %s%08X", condition[reg2], pc + offset);
+      r.mnemonic = "jr" ~ condition[reg2];
+      r.operands = [val(pc + offset)];
       r.type = Type.Jump;
       break;
     }
   case 54:
-    text = format("mmult   r%d,r%d", reg1, reg2);
+    r.mnemonic = "mmult";
+    r.operands = [R(reg1), R(reg2)];
     break;
   case 55:
-    text = format("mtoi    r%d,r%d", reg1, reg2);
+    r.mnemonic = "mtoi";
+    r.operands = [R(reg1), R(reg2)];
     break;
   case 56:
-    text = format("normi   r%d,r%d", reg1, reg2);
+    r.mnemonic = "normi";
+    r.operands = [R(reg1), R(reg2)];
     break;
   case 57:
-    text = format("nop");
-    r.type = Type.Unknown;
+    r.mnemonic = "nop";
+    r.operands = [];
+    r.type = Type.Nop;
     break;
   case 58:
-    text = format("load    (r14+r%d),r%d", reg1, reg2);
+    r.mnemonic = "load";
     r.type = Type.Assign;
+    r.operands = [deref(add(R(14), R(reg1))), R(reg2)];
     break;
   case 59:
-    text = format("load    (r15+r%d),r%d", reg1, reg2);
+    r.mnemonic = "load";
+    r.operands = [deref(add(R(15), R(reg1))), R(reg2)];
     r.type = Type.Assign;
     break;
   case 60:
-    text = format("store   r%d,(r14+r%d)", reg2, reg1);
+    r.mnemonic = "store";
+    r.operands = [R(reg1), deref(add(R(14), R(reg2)))];
     r.type = Type.Assign;
     break;
   case 61:
-    text = format("store   r%d,(r15+r%d)", reg2, reg1);
+    r.mnemonic = "store";
+    r.operands = [R(reg1), deref(add(R(15), R(reg2)))];
     r.type = Type.Assign;
     break;
   case 62:
     {
       if(isGpu)
-        text = format("sat24   r%d", reg2);
+      {
+        r.mnemonic = "sat24";
+        r.operands = [R(reg2)];
+      }
       else
-        text = format("invalid");
+      {
+        // invalid
+        r.type = Type.Unknown;
+      }
 
       break;
     }
@@ -391,21 +511,21 @@ static Instruction dasmInstruction(bool isGpu, out string text, uint pc, const u
     {
       if(reg1 == 0)
       {
-        text = format("pack    r%d", reg2);
+        r.mnemonic = "pack";
+        r.operands = [R(reg2)];
       }
       else if(reg1 == 1)
       {
-        text = format("unpack    r%d", reg2);
+        r.mnemonic = "unpack";
+        r.operands = [R(reg2)];
       }
       else
-      {
-        text = format("invalid");
         r.type = Type.Unknown;
-      }
     }
     else
     {
-      text = format("addqmod $%x,r%d", notZero(reg1), reg2);
+      r.mnemonic = "addqmod";
+      r.operands = [val(notZero(reg1)), R(reg2)];
     }
 
     break;

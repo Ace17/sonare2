@@ -63,9 +63,12 @@ class i386Architecture : Architecture
       Instruction instruction;
       instruction.address = ins.address;
       instruction.bytes = doc.data[offset .. offset + ins.size];
-      instruction.asm_ = format("%.5s %s",
-                                fromStringz(ins.mnemonic),
-                                fromStringz(ins.op_str));
+      instruction.mnemonic = fromStringz(ins.mnemonic);
+
+      // hack: put all operands into a single identifier expression
+      auto id = new IdentifierExpr;
+      id.name = fromStringz(ins.op_str);
+      instruction.operands = [id];
 
       instruction.type = getInstructionType(cast(x86_insn)ins.id);
 
@@ -142,9 +145,9 @@ Type getInstructionType(x86_insn id)
   }
 }
 
-char[] fromStringz(char[] s)
+string fromStringz(char[] s)
 {
   import core.stdc.string;
-  return s[0 .. strlen(s.ptr)];
+  return s[0 .. strlen(s.ptr)].idup;
 }
 

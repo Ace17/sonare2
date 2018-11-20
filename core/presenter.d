@@ -76,12 +76,14 @@ class Presenter : InputSink, EditBox.Sink
         hasLabel = false;
 
         Line line;
+        auto operandText = join(map!formatExpression(ins.operands), ", ");
 
         line.color = getColor(ins.type);
-        line.text = format("0x%.4X:    %-24s %s",
+        line.text = format("0x%.4X:    %-24s %-8s %s",
                            ins.address,
                            toHex(ins.bytes),
-                           ins.asm_);
+                           ins.mnemonic,
+                           operandText);
 
         r ~= line;
       }
@@ -194,16 +196,37 @@ string toHex(in ubyte[] b)
   return join(map!hex(b), " ");
 }
 
+string formatExpression(in Expr e)
+{
+  if(auto n = cast(NumberExpr)e)
+  {
+    return format("0x%X", n.value);
+  }
+  else if(auto i = cast(IdentifierExpr)e)
+  {
+    return i.name;
+  }
+  else if(auto d = cast(DerefExpr)e)
+  {
+    return "[" ~ formatExpression(d.sub) ~ "]";
+  }
+  else
+  {
+    return typeid(e).name;
+  }
+}
+
 Color getColor(Type insType)
 {
   final switch(insType)
   {
   case Type.Jump: return Color.Green;
-  case Type.Call: return Color.Red;
-  case Type.Ret: return Color.Red;
-  case Type.Assign: return Color.Blue;
+  case Type.Call: return Color.Green;
+  case Type.Ret: return Color.Green;
+  case Type.Assign: return Color.White;
   case Type.Op: return Color.Blue;
-  case Type.Unknown: return Color.White;
+  case Type.Nop: return Color.Blue;
+  case Type.Unknown: return Color.Red;
   }
 }
 
