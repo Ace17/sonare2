@@ -27,6 +27,7 @@ class RawLoader : Loader
     if(doc.arch == "")
       doc.arch = "x86_64";
 
+    doc.entryPoint = doc.address;
     doc.data = cast(ubyte[])std.file.read(path);
   }
 }
