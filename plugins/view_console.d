@@ -136,7 +136,7 @@ class ConsoleView : IView
         }
 
         if(k == LINES / 2)
-          pair = 2;
+          pair = 10;
 
         attr = COLOR_PAIR(pair);
 
@@ -210,10 +210,11 @@ class ConsoleView : IView
     if(has_colors())
     {
       init_pair(1, COLOR_WHITE, COLOR_BLUE);
-      init_pair(2, COLOR_BLACK, COLOR_WHITE);
+      init_pair(2, COLOR_YELLOW, COLOR_BLACK);
       init_pair(3, COLOR_GREEN, COLOR_BLACK);
       init_pair(4, COLOR_BLUE, COLOR_BLACK);
       init_pair(5, COLOR_RED, COLOR_BLACK);
+      init_pair(10, COLOR_BLACK, COLOR_WHITE);
 
       CHECK!wbkgd(m_separator, COLOR_PAIR(1));
     }

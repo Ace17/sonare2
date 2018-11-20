@@ -235,7 +235,7 @@ Color getColor(Type insType)
   case Type.Jump: return Color.Green;
   case Type.Call: return Color.Green;
   case Type.Ret: return Color.Green;
-  case Type.Assign: return Color.White;
+  case Type.Assign: return Color.Yellow;
   case Type.Op: return Color.Blue;
   case Type.Nop: return Color.Blue;
   case Type.Unknown: return Color.Red;
