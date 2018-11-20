@@ -174,8 +174,6 @@ class ConsoleView : IView
     CHECK!noecho();
     CHECK!nonl();
     CHECK!intrflush(null, false);
-    // Do not enable keypad() since we want to pass unadulterated input to
-    // readline
 
     // Explicitly specify a "very visible" cursor to make sure it's at least
     // consistent when we turn the cursor on and off (maybe it would make sense
