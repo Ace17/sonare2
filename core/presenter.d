@@ -59,7 +59,7 @@ class Presenter : InputSink, EditBox.Sink
         // unmapped memory
         if(ins.address == ulong.max)
         {
-          r ~= Line("~");
+          r ~= toLine("~", Color.White);
           srcK++;
           continue;
         }
@@ -67,7 +67,7 @@ class Presenter : InputSink, EditBox.Sink
         // label needed
         if(ins.address in m_doc.symbols && !hasLabel)
         {
-          r ~= Line(m_doc.symbols[ins.address] ~ ":", Color.Green);
+          r ~= toLine(m_doc.symbols[ins.address] ~ ":", Color.Green);
           hasLabel = true;
           continue;
         }
@@ -75,17 +75,19 @@ class Presenter : InputSink, EditBox.Sink
         srcK++;
         hasLabel = false;
 
-        Line line;
         auto operandText = join(map!formatExpression(ins.operands), ", ");
 
-        line.color = getColor(ins.type);
-        line.text = format("0x%.4X:    %-24s %-8s %s",
-                           ins.address,
-                           toHex(ins.bytes),
-                           ins.mnemonic,
-                           operandText);
+        auto addressText = format("   0x%.8X:    ", ins.address);
+        auto addressLine = toLine(addressText, Color.Green);
 
-        r ~= line;
+        const color = getColor(ins.type);
+        auto assemblyText = format("%-24s %-8s %s",
+                                   toHex(ins.bytes),
+                                   ins.mnemonic,
+                                   operandText);
+        auto assemblyLine = toLine(assemblyText, color);
+
+        r ~= Line(addressLine.text ~ assemblyLine.text);
       }
 
       return r;
@@ -131,7 +133,7 @@ class Presenter : InputSink, EditBox.Sink
     }
     catch(Exception e)
     {
-      vm.lines = [Line(e.msg)];
+      vm.lines = [toLine(e.msg, Color.Red)];
     }
     m_sink.refresh(vm);
   }
@@ -164,7 +166,7 @@ class Presenter : InputSink, EditBox.Sink
 
     if(!empty(m_doc.result))
     {
-      vm.lines = array(map!Line(m_doc.result));
+      vm.lines = array(map!toLine(m_doc.result));
       m_doc.result = [];
     }
     else
@@ -184,6 +186,16 @@ class Presenter : InputSink, EditBox.Sink
 
 private:
   int m_scrolling;
+}
+
+static Line toLine(string s, Color color = Color.Red)
+{
+  Line line;
+
+  foreach(c; s)
+    line.text ~= Char(c, color);
+
+  return line;
 }
 
 string toHex(in ubyte[] b)

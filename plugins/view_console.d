@@ -107,7 +107,7 @@ class ConsoleView : IView
     Line getLine(int i)
     {
       if(i < 0 || i >= m_viewModel.lines.length)
-        return Line("");
+        return Line();
 
       return m_viewModel.lines[i];
     }
@@ -118,9 +118,10 @@ class ConsoleView : IView
 
       ulong attr = ulong.max;
 
+      foreach(int i, c; line.text)
       {
         int pair;
-        final switch(line.color)
+        final switch(c.color)
         {
         case Color.White: pair = 0;
           break;
@@ -138,15 +139,11 @@ class ConsoleView : IView
           pair = 2;
 
         attr = COLOR_PAIR(pair);
-      }
 
-      if(attr != ulong.max)
         wattron(m_txtWindow, attr);
-
-      CHECK!mvwaddstr(m_txtWindow, 1 + k, 1, toStringz(line.text));
-
-      if(attr != ulong.max)
+        CHECK!mvwaddch(m_txtWindow, 1 + k, 1 + i, c.value);
         wattroff(m_txtWindow, attr);
+      }
     }
 
     if(m_viewModel.commandMode)

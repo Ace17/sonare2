@@ -21,10 +21,15 @@ struct ViewModel
   string command;
 }
 
+struct Char
+{
+  char value;
+  Color color;
+}
+
 struct Line
 {
-  string text;
-  Color color;
+  const(Char)[] text;
 }
 
 enum Color
