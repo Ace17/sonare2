@@ -75,19 +75,19 @@ class Presenter : InputSink, EditBox.Sink
         srcK++;
         hasLabel = false;
 
-        auto operandText = join(map!formatExpression(ins.operands), ", ");
+        auto operandLine = join(map!formatExpression(ins.operands), toLine(", ", Color.White).text);
 
         auto addressText = format("   0x%.8X:    ", ins.address);
         auto addressLine = toLine(addressText, Color.Green);
 
         const color = getColor(ins.type);
-        auto assemblyText = format("%-24s %-8s %s",
+        auto assemblyText = format("%-24s %-8s ",
                                    toHex(ins.bytes),
-                                   ins.mnemonic,
-                                   operandText);
+                                   ins.mnemonic);
+
         auto assemblyLine = toLine(assemblyText, color);
 
-        r ~= Line(addressLine.text ~ assemblyLine.text);
+        r ~= Line(addressLine.text ~ assemblyLine.text ~ operandLine);
       }
 
       return r;
@@ -190,12 +190,17 @@ private:
 
 static Line toLine(string s, Color color = Color.Red)
 {
-  Line line;
+  return Line(colorize(s, color));
+}
+
+const(Char)[] colorize(string s, Color color)
+{
+  const(Char)[] text;
 
   foreach(c; s)
-    line.text ~= Char(c, color);
+    text ~= Char(c, color);
 
-  return line;
+  return text;
 }
 
 string toHex(in ubyte[] b)
@@ -208,23 +213,25 @@ string toHex(in ubyte[] b)
   return join(map!hex(b), " ");
 }
 
-string formatExpression(in Expr e)
+const(Char)[] formatExpression(in Expr e)
 {
   if(auto n = cast(NumberExpr)e)
   {
-    return format("0x%X", n.value);
+    return colorize(format("0x%X", n.value), Color.Yellow);
   }
   else if(auto i = cast(IdentifierExpr)e)
   {
-    return i.name;
+    return colorize(i.name, Color.Red);
   }
   else if(auto d = cast(DerefExpr)e)
   {
-    return "[" ~ formatExpression(d.sub) ~ "]";
+    return Char('[', Color.White)
+           ~formatExpression(d.sub)
+           ~Char(']', Color.White);
   }
   else
   {
-    return typeid(e).name;
+    return colorize(typeid(e).name, Color.Red);
   }
 }
 
