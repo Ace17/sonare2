@@ -12,7 +12,7 @@ import registry;
 
 interface Architecture
 {
-  void disassemble(Document doc);
+  Instruction disassemble(const(ubyte)[] code, ulong pc);
 }
 
 Registry!Architecture g_Architectures;

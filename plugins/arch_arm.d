@@ -24,18 +24,24 @@ static this()
 
 class ArmArchitecture : Architecture
 {
-  void disassemble(Document doc)
-  {
-    csh handle;
+  csh handle;
 
+  this()
+  {
     if(cs_open(cs_arch.CS_ARCH_ARM, cs_mode.CS_MODE_ARM, &handle) != cs_err.CS_ERR_OK)
       throw new Exception("can't open capstone");
+  }
 
-    scope(exit) cs_close(&handle);
+  ~this()
+  {
+    cs_close(&handle);
+  }
 
+  Instruction disassemble(const(ubyte)[] code, ulong pc)
+  {
     cs_insn* insn;
 
-    const count = cs_disasm(handle, cast(ubyte*)doc.data.ptr, doc.data.length, doc.address, 0UL, &insn);
+    const count = cs_disasm(handle, cast(ubyte*)code.ptr, code.length, pc, 1, &insn);
 
     if(count <= 0)
       throw new Exception("failed to disassemble");
@@ -44,11 +50,9 @@ class ArmArchitecture : Architecture
 
     Instruction convert(ref cs_insn ins)
     {
-      const offset = ins.address - doc.address;
-
       Instruction instruction;
       instruction.address = ins.address;
-      instruction.bytes = doc.data[offset .. offset + ins.size];
+      instruction.bytes = code[0 .. ins.size];
       instruction.mnemonic = fromStringz(ins.mnemonic);
 
       // hack: put all operands into a single identifier expression
@@ -61,7 +65,7 @@ class ArmArchitecture : Architecture
       return instruction;
     }
 
-    doc.instructions = array(map!convert(insn[0 .. count]));
+    return convert(*insn);
   }
 }
 

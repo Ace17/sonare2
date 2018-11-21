@@ -16,24 +16,9 @@ static this()
 
 class JaguarArchitecture(bool isGpu) : Architecture
 {
-  void disassemble(Document doc)
+  Instruction disassemble(const(ubyte)[] code, ulong pc)
   {
-    int pc = cast(int)doc.address;
-    int i = 0;
-
-    while(i < cast(int)doc.data.length)
-    {
-      auto instruction = dasmInstruction(isGpu, pc, doc.data[i .. $]);
-      const size = instruction.bytes.length;
-
-      if(!size)
-        break;
-
-      doc.instructions ~= instruction;
-
-      i += size;
-      pc += size;
-    }
+    return dasmInstruction(isGpu, cast(uint)pc, code);
   }
 }
 

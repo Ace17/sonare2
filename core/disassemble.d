@@ -7,7 +7,25 @@ import std.format;
 void cmd_disassemble(Document doc)
 {
   auto arch = g_Architectures.get(doc.arch);
-  arch.disassemble(doc);
+
+  {
+    int pc = cast(int)doc.address;
+    int i = 0;
+
+    while(i < cast(int)doc.data.length)
+    {
+      auto instruction = arch.disassemble(doc.data[i .. $], pc);
+      const size = instruction.bytes.length;
+
+      if(!size)
+        break;
+
+      doc.instructions ~= instruction;
+
+      i += size;
+      pc += size;
+    }
+  }
 
   doc.symbols[doc.entryPoint] = "entry0";
 
