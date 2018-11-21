@@ -77,7 +77,7 @@ class Presenter : InputSink, EditBox.Sink
 
         auto operandLine = join(map!formatExpression(ins.operands), toLine(", ", Color.White).text);
 
-        auto addressText = format("   0x%.8X:    ", ins.address);
+        auto addressText = format("   0x%.8x:    ", ins.address);
         auto addressLine = toLine(addressText, Color.Green);
 
         const color = getColor(ins.type);
@@ -217,7 +217,7 @@ const(Char)[] formatExpression(in Expr e)
 {
   if(auto n = cast(NumberExpr)e)
   {
-    string fmt = "0x%X";
+    string fmt = "0x%x";
 
     if(n.value == 0 || n.value == 1)
       fmt = "%s";
