@@ -76,7 +76,7 @@ class Presenter : InputSink, EditBox.Sink
 
         auto operandLine = join(map!formatExpression(ins.operands), toLine(", ", Color.White).text);
 
-        auto addressText = format("   0x%.8x:    ", ins.address);
+        auto addressText = format("   0x%.8x     ", ins.address);
         auto addressLine = toLine(addressText, Color.Green);
 
         const color = getColor(ins.type);
@@ -225,7 +225,7 @@ const(Char)[] formatExpression(in Expr e)
   }
   else if(auto i = cast(IdentifierExpr)e)
   {
-    return colorize(i.name, Color.Red);
+    return colorize(i.name, Color.Blue);
   }
   else if(auto d = cast(DerefExpr)e)
   {
@@ -247,8 +247,8 @@ Color getColor(Type insType)
   case Type.Call: return Color.Green;
   case Type.Ret: return Color.Green;
   case Type.Assign: return Color.Yellow;
-  case Type.Op: return Color.Blue;
-  case Type.Nop: return Color.Blue;
+  case Type.Op: return Color.White;
+  case Type.Nop: return Color.White;
   case Type.Unknown: return Color.Red;
   }
 }

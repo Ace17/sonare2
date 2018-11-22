@@ -35,6 +35,7 @@ enum Color
   White,
   Green,
   Yellow,
+  DarkBlue,
   Blue,
   Red,
 }
