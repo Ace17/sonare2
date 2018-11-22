@@ -8,6 +8,8 @@
 // The binary blob being analyzed.
 // This never should be accessed by the view.
 
+import instruction;
+
 class Document
 {
   string format;
@@ -22,51 +24,5 @@ class Document
   string[ulong] symbols;
 
   string[] result;
-}
-
-abstract class Expr
-{
-}
-
-class NumberExpr : Expr
-{
-  long value;
-}
-
-class IdentifierExpr : Expr
-{
-  string name;
-}
-
-class DerefExpr : Expr
-{
-  Expr sub;
-}
-
-class AddExpr : Expr
-{
-  Expr a, b;
-}
-
-struct Instruction
-{
-  ulong address;
-
-  string mnemonic;
-  Expr[] operands;
-
-  const(ubyte)[] bytes;
-  Type type;
-}
-
-enum Type
-{
-  Unknown,
-  Nop,
-  Jump,
-  Call,
-  Ret,
-  Assign,
-  Op,
 }
 

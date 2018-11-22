@@ -14,10 +14,11 @@ SRCS:=\
 	core/document.d\
 	core/edit_box.d\
 	core/input_sink.d\
+	core/instruction.d\
 	core/loader.d\
-	core/shell.d\
 	core/presenter.d\
 	core/registry.d\
+	core/shell.d\
 	core/view.d\
 
 include plugins/plugins.mk

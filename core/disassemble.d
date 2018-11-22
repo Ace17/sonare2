@@ -7,6 +7,8 @@
 
 import arch;
 import document;
+import instruction;
+
 import std.algorithm: map;
 import std.array: join;
 import std.format;

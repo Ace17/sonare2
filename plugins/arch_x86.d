@@ -14,7 +14,6 @@ import capstone;
 import capstone_x86;
 
 import arch;
-import document;
 
 static this()
 {

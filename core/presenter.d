@@ -16,6 +16,7 @@ import std.string;
 import document;
 import edit_box;
 import input_sink;
+import instruction;
 import shell;
 import view;
 

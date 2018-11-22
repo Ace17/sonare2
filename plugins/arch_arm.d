@@ -13,7 +13,6 @@ import std.string;
 import capstone;
 
 import arch;
-import document;
 
 static this()
 {

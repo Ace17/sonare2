@@ -6,7 +6,6 @@
 // License, or (at your option) any later version.
 
 import arch;
-import document;
 
 static this()
 {

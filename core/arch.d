@@ -5,13 +5,13 @@
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
 
-import document;
-import registry;
+public import instruction;
 
 interface Architecture
 {
   Instruction disassemble(const(ubyte)[] code, ulong pc);
 }
 
+import registry;
 Registry!Architecture g_Architectures;
 
