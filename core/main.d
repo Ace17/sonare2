@@ -33,18 +33,32 @@ int main(string[] args)
   }
 }
 
+ulong parseNumber(string number)
+{
+  import std.conv: parse;
+  import std.string: startsWith;
+
+  if(startsWith(number, "0x"))
+  {
+    auto s = number[2 .. $];
+    return parse!ulong (s, 16);
+  }
+  else
+    return parse!ulong (number, 10);
+}
+
 void safeMain(string[] args)
 {
   string script;
   string uiType = "console";
   string binFmt;
   string binArch;
-  uint baseAddress;
+  string sBaseAddress;
 
   auto helpInfo = getopt(args,
                          "f|format", "input format (raw, elf, etc.)", &binFmt,
                          "a|arch", "input architecture (arm, x86, etc.)", &binArch,
-                         "m|base-address", "base address", &baseAddress,
+                         "m|base-address", "base address", &sBaseAddress,
                          "u|ui", "UI to use (console, sdl)", &uiType,
                          "i|script", "script file to run", &script);
 
@@ -54,6 +68,11 @@ void safeMain(string[] args)
     defaultGetoptPrinter("Options:", helpInfo.options);
     return;
   }
+
+  ulong baseAddress;
+
+  if(sBaseAddress != "")
+    baseAddress = parseNumber(sBaseAddress);
 
   auto shell = new Shell;
   scope(exit) destroy(shell);
