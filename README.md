@@ -1,4 +1,4 @@
-# sonare
+# sonare2
 An interactive disassembler for reverse engineering
 
 This is intended to be an alternative to radare2.

@@ -2,4 +2,4 @@
 set -euo pipefail
 ./scripts/reformat.sh core plugins
 make -j`nproc`
-./bin/snr -h >/dev/null
+./bin/s2 -h >/dev/null

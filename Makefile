@@ -23,7 +23,7 @@ SRCS:=\
 
 include plugins/plugins.mk
 
-$(BIN)/snr: $(SRCS)
+$(BIN)/s2: $(SRCS)
 	@mkdir -p $(dir $@)
 	$(DC) $^ $(DFLAGS) $(LDFLAGS) -o "$@"
 
