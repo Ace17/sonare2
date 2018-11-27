@@ -18,7 +18,7 @@ void cmd_disassemble(Document doc)
   auto arch = g_Architectures.get(doc.arch);
 
   {
-    int pc = cast(int)doc.address;
+    auto pc = doc.address;
     int i = 0;
 
     while(i < cast(int)doc.data.length)
