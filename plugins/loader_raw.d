@@ -22,11 +22,12 @@ class RawLoader : Loader
     return false; // don't default to raw
   }
 
-  void load(Document doc, string path)
+  void load(Document doc, string path, ulong baseAddress)
   {
     if(doc.arch == "")
       doc.arch = "x86_64";
 
+    doc.address = baseAddress != ulong.max ? baseAddress : 0;
     doc.entryPoint = doc.address;
     doc.data = cast(ubyte[])std.file.read(path);
   }

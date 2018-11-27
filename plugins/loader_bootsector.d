@@ -30,10 +30,10 @@ class BootSectorLoader : Loader
     return true;
   }
 
-  void load(Document doc, string path)
+  void load(Document doc, string path, ulong baseAddress)
   {
     doc.arch = "x86_16";
-    doc.address = 0x7c00;
+    doc.address = baseAddress != ulong.max ? baseAddress : 0x7c00;
     doc.data = cast(ubyte[])std.file.read(path);
   }
 }

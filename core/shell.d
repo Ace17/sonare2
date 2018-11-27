@@ -77,7 +77,7 @@ MetaInfo Meta(alias F)()
     static if(is (Defaults[i] == void))
       r.defaults ~= null;
     else
-      r.defaults ~= Defaults[i];
+      r.defaults ~= to!string(Defaults[i]);
   }
 
   return r;

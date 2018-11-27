@@ -111,8 +111,7 @@ void safeMain(string[] args)
   {
     doc.format = binFmt;
     doc.arch = binArch;
-    doc.address = baseAddress;
-    cmd_load(doc, args[1]);
+    cmd_load(doc, args[1], baseAddress);
     cmd_disassemble(doc);
   }
 

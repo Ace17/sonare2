@@ -13,7 +13,7 @@ import std.stdio;
 import document;
 import registry;
 
-void cmd_load(Document doc, string path)
+void cmd_load(Document doc, string path, ulong address = ulong.max)
 {
   auto name = doc.format;
 
@@ -24,7 +24,7 @@ void cmd_load(Document doc, string path)
   }
 
   auto loader = g_Loaders.get(name);
-  loader.load(doc, path);
+  loader.load(doc, path, address);
 }
 
 void cmd_symbols(Document doc)
@@ -48,7 +48,7 @@ string guessFormat(string path)
 interface Loader
 {
   bool probe(string path);
-  void load(Document doc, string path);
+  void load(Document doc, string path, ulong baseAddress);
 }
 
 Registry!Loader g_Loaders;

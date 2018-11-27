@@ -30,8 +30,11 @@ class ElfLoader : Loader
     return true;
   }
 
-  void load(Document prog, string path)
+  void load(Document prog, string path, ulong address)
   {
+    if(address != ulong.max)
+      throw new Exception("ELF loading to a user-specified address isn't implemented");
+
     const rawBytes = cast(ubyte[])std.file.read(path);
     auto elf = parse(rawBytes);
     switch(elf.fileHeader.e_machine)
