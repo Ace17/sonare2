@@ -8,6 +8,7 @@
 // command line parsing and completion
 
 import std.algorithm;
+import std.conv: to;
 import std.stdio;
 import std.string;
 import std.traits;
@@ -36,13 +37,26 @@ unittest
 unittest
 {
   // default arguments
-  auto s = new Shell;
-  string result;
-  void action(string s = "hello") { result = s; }
+  {
+    auto s = new Shell;
+    string result;
+    void action(string s = "hello") { result = s; }
 
-  s.addAction("action", &action, Meta!action, "desc");
-  s.processOneLine("action");
-  assertEquals("hello", result);
+    s.addAction("action", &action, Meta!action, "desc");
+    s.processOneLine("action");
+    assertEquals("hello", result);
+  }
+
+  // numeric arguments
+  {
+    auto s = new Shell;
+    int result;
+    void actionInt(int val) { result = val; }
+
+    s.addAction("action", &actionInt, Meta!actionInt, "desc");
+    s.processOneLine("action 12345");
+    assertEquals(12345, result);
+  }
 }
 
 struct MetaInfo
@@ -93,9 +107,9 @@ public:
       foreach(i, t; ParamTypes)
       {
         if(i < dynamicArgs.length)
-          argValues[i] = dynamicArgs[i];
+          parseArg(argValues[i], dynamicArgs[i]);
         else if(i < meta.defaults.length && meta.defaults[i])
-          argValues[i] = meta.defaults[i];
+          parseArg(argValues[i], meta.defaults[i]);
         else
         {
           const msg = format("Command '%s' takes %s arguments, got %s", name, N, dynamicArgs.length);
@@ -150,6 +164,12 @@ private:
 
     action.func(argv[1 .. $]);
   }
+
+  static void parseArg(ref string s, string val) { s = val; }
+
+  static void parseArg(ref int s, string val) { s = to!int (val); }
+
+  static void parseArg(ref ulong s, string val) { s = to!ulong (val); }
 
   // actions
 
