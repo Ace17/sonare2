@@ -11,7 +11,6 @@ import std.file;
 import std.stdio;
 
 import document;
-import registry;
 
 void cmd_load(Document doc, string path, ulong address = ulong.max)
 {
@@ -47,9 +46,14 @@ string guessFormat(string path)
 
 interface Loader
 {
+  // return true if this loader can load the file at 'path'
   bool probe(string path);
+
+  // load the binary from 'path' into 'doc'
   void load(Document doc, string path, ulong baseAddress);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+import registry;
 Registry!Loader g_Loaders;
 

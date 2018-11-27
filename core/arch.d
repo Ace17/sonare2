@@ -9,9 +9,11 @@ public import instruction;
 
 interface Architecture
 {
+  // disassemble one instruction, starting at code[0]
   Instruction disassemble(const(ubyte)[] code, ulong pc);
 }
 
+///////////////////////////////////////////////////////////////////////////////
 import registry;
 Registry!Architecture g_Architectures;
 
