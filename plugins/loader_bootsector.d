@@ -32,9 +32,18 @@ class BootSectorLoader : Loader
 
   void load(Document doc, string path, ulong baseAddress)
   {
+    if(baseAddress == ulong.max)
+      baseAddress = 0x7c00;
+
     doc.arch = "x86_16";
-    doc.address = baseAddress != ulong.max ? baseAddress : 0x7c00;
-    doc.data = cast(ubyte[])std.file.read(path);
+
+    Region reg;
+    reg.address = baseAddress;
+    reg.data = cast(ubyte[])std.file.read(path);
+
+    doc.regions ~= reg;
+
+    doc.entryPoint = baseAddress;
   }
 }
 

@@ -84,8 +84,12 @@ private:
 
       if(hasBits && executable && sectionName == ".text")
       {
-        prog.address = sectionAddr;
-        prog.data = raw_sect.data;
+        Region reg;
+
+        reg.address = sectionAddr;
+        reg.data = raw_sect.data;
+
+        prog.regions ~= reg;
       }
     }
   }

@@ -10,16 +10,24 @@
 
 import instruction;
 
+struct Region
+{
+  ulong address;
+  ulong size;
+  ubyte[] data;
+
+  // disassembler output
+  Instruction[] instructions;
+}
+
 class Document
 {
   string format;
   string arch;
 
-  ulong address;
-  ubyte[] data;
+  Region[] regions;
 
   ulong entryPoint;
-  Instruction[] instructions;
 
   string[ulong] symbols;
 

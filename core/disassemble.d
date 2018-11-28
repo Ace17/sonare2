@@ -17,19 +17,20 @@ void cmd_disassemble(Document doc)
 {
   auto arch = g_Architectures.get(doc.arch);
 
+  foreach(ref reg; doc.regions)
   {
-    auto pc = doc.address;
+    auto pc = reg.address;
     int i = 0;
 
-    while(i < cast(int)doc.data.length)
+    while(i < cast(int)reg.data.length)
     {
-      auto instruction = arch.disassemble(doc.data[i .. $], pc);
+      auto instruction = arch.disassemble(reg.data[i .. $], pc);
       const size = instruction.bytes.length;
 
       if(!size)
         break;
 
-      doc.instructions ~= instruction;
+      reg.instructions ~= instruction;
 
       i += size;
       pc += size;
@@ -41,14 +42,15 @@ void cmd_disassemble(Document doc)
   int labelCount;
 
   // basic code xrefs
-  foreach(instruction; doc.instructions)
-  {
-    if(instruction.type == Type.Jump || instruction.type == Type.Call)
+  foreach(ref reg; doc.regions)
+    foreach(instruction; reg.instructions)
     {
-      foreach(c; join(map!allConstants(instruction.operands)))
-        doc.symbols[c] = format("_%s", labelCount++);
+      if(instruction.type == Type.Jump || instruction.type == Type.Call)
+      {
+        foreach(c; join(map!allConstants(instruction.operands)))
+          doc.symbols[c] = format("_%s", labelCount++);
+      }
     }
-  }
 }
 
 ulong[] allConstants(Expr e)

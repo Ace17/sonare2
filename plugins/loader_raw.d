@@ -27,9 +27,17 @@ class RawLoader : Loader
     if(doc.arch == "")
       doc.arch = "x86_64";
 
-    doc.address = baseAddress != ulong.max ? baseAddress : 0;
-    doc.entryPoint = doc.address;
-    doc.data = cast(ubyte[])std.file.read(path);
+    if(baseAddress == ulong.max)
+      baseAddress = 0;
+
+    Region reg;
+
+    reg.address = baseAddress;
+    reg.data = cast(ubyte[])std.file.read(path);
+
+    doc.regions ~= reg;
+
+    doc.entryPoint = baseAddress;
   }
 }
 
