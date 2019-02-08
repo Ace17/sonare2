@@ -107,22 +107,31 @@ void safeMain(string[] args)
   presenter.setView(view);
   presenter.m_shell = shell;
 
-  if(args.length > 1)
+  try
   {
-    doc.format = binFmt;
-    doc.arch = binArch;
-    cmd_load(doc, args[1], baseAddress);
-    cmd_disassemble(doc);
-  }
+    if(args.length > 1)
+    {
+      doc.format = binFmt;
+      doc.arch = binArch;
+      cmd_load(doc, args[1], baseAddress);
+      cmd_disassemble(doc);
+    }
 
-  if(script)
+    if(script)
+    {
+      foreach(line; File(script).byLineCopy)
+        shell.processOneLine(line);
+    }
+
+    // HACK: trigger a refresh
+    presenter.onChar('\b');
+  }
+  catch(Exception e)
   {
-    foreach(line; File(script).byLineCopy)
-      shell.processOneLine(line);
+    ViewModel vm;
+    vm.lines = [toLine(e.msg, Color.Red)];
+    view.refresh(vm);
   }
-
-  // HACK: trigger a refresh
-  presenter.onChar('\b');
 
   view.run();
 }
