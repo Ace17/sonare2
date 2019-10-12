@@ -7,6 +7,8 @@
 
 // Loader for x86 16-bit real-mode bootsector
 
+import std.file;
+
 import document;
 import loader;
 

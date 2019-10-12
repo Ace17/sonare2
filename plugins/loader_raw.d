@@ -9,6 +9,7 @@
 
 import document;
 import loader;
+import std.file;
 
 static this()
 {

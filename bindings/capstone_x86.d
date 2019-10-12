@@ -196,12 +196,12 @@ struct cs_x86 {
 	// See X86_PREFIX_CS/SS/DS/ES/FS/GS above.
 	// prefix[2] indicates operand-size override (X86_PREFIX_OPSIZE)
 	// prefix[3] indicates address-size override (X86_PREFIX_ADDRSIZE)
-	ubyte prefix[4];
+	ubyte[4] prefix;
 
 	// Instruction opcode, wich can be from 1 to 4 bytes in size.
 	// This contains VEX opcode as well.
 	// An trailing opcode byte gets value 0 when irrelevant.
-	ubyte opcode[4];
+	ubyte[4] opcode;
 
 	// REX prefix: only a non-zero value is relavant for x86_64
 	ubyte rex;
@@ -242,7 +242,7 @@ struct cs_x86 {
 	// or 0 when instruction has no operand.
 	ubyte op_count;
 
-	cs_x86_op operands[8];	// operands for this instruction.
+	cs_x86_op[8] operands;	// operands for this instruction.
 }
 
 //> X86 instructions

@@ -8,6 +8,7 @@
 // Loader for ELF files
 
 import std.conv;
+import std.file;
 import std.string;
 
 import document;

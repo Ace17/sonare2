@@ -1,4 +1,4 @@
-import std.c.linux.linux;
+import core.sys.posix.sys.types;
 import core.stdc.config : c_ulong, c_long;
 
 /// Argument for `personality (2)` to disable ASLR
@@ -136,7 +136,7 @@ version(X86) {
 extern(C) {
 	/// personality (2)
 	int personality(c_ulong);
-	
+
 	/// ptrace (2)
 	c_long ptrace(PTraceRequest, pid_t, void*, void*);
 }

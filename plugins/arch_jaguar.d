@@ -110,7 +110,7 @@ static Instruction dasmInstruction(bool isGpu, uint pc, const ubyte[] code)
     auto val = (p[0] << 8) | (p[1] << 0);
     p += 2;
     return val;
-  };
+  }
 
   auto const op = read16_BE();
   auto const opCode = (op >> 10) & 0b111111;

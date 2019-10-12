@@ -1,8 +1,9 @@
+all: true_all
+
 BIN?=bin
 
 DC?=gdc
 
-DFLAGS+=-funittest
 DFLAGS+=-Ibindings
 
 SRCS:=\
@@ -27,6 +28,10 @@ $(BIN)/s2: $(SRCS)
 	@mkdir -p $(dir $@)
 	$(DC) $^ $(DFLAGS) $(LDFLAGS) -o "$@"
 
+$(BIN)/unittests: $(SRCS)
+	@mkdir -p $(dir $@)
+	$(DC) $^ $(DFLAGS) $(LDFLAGS) -funittest -o "$@"
+
 #------------------------------------------------------------------------------
 # Generic rules
 #------------------------------------------------------------------------------
@@ -36,3 +41,4 @@ LDFLAGS+=$(shell pkg-config $(PKGS) --libs)
 clean:
 	rm -rf $(BIN)
 
+true_all: $(BIN)/s2 $(BIN)/unittests

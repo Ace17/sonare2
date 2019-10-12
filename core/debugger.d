@@ -47,7 +47,7 @@ void run_debugger(pid_t child_pid)
     ptrace.ptrace(PTraceRequest.PTRACE_GETREGS, child_pid, null, &regs);
     const instr = ptrace.ptrace(PTraceRequest.PTRACE_PEEKTEXT, child_pid, cast(void*)regs.rip, null);
 
-    printf("[%u] RIP = 0x%08x. instr = 0x%08x\n",
+    printf("[%u] RIP = 0x%08lx. instr = 0x%08lx\n",
            icounter, regs.rip, instr);
 
     // Make the child execute another instruction

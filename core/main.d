@@ -18,6 +18,7 @@ import loader;
 import presenter;
 import shell;
 import view;
+import arch;
 
 int main(string[] args)
 {
