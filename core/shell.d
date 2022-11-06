@@ -160,7 +160,7 @@ private:
       return;
 
     auto argv = split(cmdLine);
-    auto action = getAction(argv[0]);
+    auto action = matchAction(argv[0]);
 
     action.func(argv[1 .. $]);
   }
@@ -187,6 +187,25 @@ private:
       foreach(name; m_actions.keys.sort)
         writefln("  %20s : %s", name, m_actions[name].desc);
     }
+  }
+
+  const(Action)* matchAction(string name)
+  {
+    string[] matchedNames;
+
+    foreach(actionName, ref action; m_actions)
+    {
+      if(startsWith(actionName, name))
+        matchedNames ~= actionName;
+    }
+
+    if(matchedNames.length == 0)
+      throw new Exception("No such command: \"" ~ name ~ "\"");
+
+    if(matchedNames.length > 1)
+      throw new Exception("Ambiguous command: \"" ~ name ~ "\", matches: " ~ to!string(matchedNames));
+
+    return &m_actions[matchedNames[0]];
   }
 
   const(Action)* getAction(string name)
