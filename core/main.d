@@ -11,6 +11,7 @@
 import std.getopt;
 import std.stdio;
 
+import arch;
 import debugger;
 import disassemble;
 import document;
@@ -18,7 +19,6 @@ import loader;
 import presenter;
 import shell;
 import view;
-import arch;
 
 int main(string[] args)
 {

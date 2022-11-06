@@ -17,9 +17,9 @@ import arch;
 
 static this()
 {
-  g_Architectures.register("x86_16", new x86Architecture !16);
-  g_Architectures.register("x86_32", new x86Architecture !32);
-  g_Architectures.register("x86_64", new x86Architecture !64);
+  g_Architectures.register("x86_16", new x86Architecture!16);
+  g_Architectures.register("x86_32", new x86Architecture!32);
+  g_Architectures.register("x86_64", new x86Architecture!64);
 }
 
 class x86Architecture(int bits) : Architecture

@@ -9,27 +9,27 @@
 
 struct Registry (T)
 {
-  void register(string name, T a)
-  {
-    if(name in m_entries)
-      throw new Exception("A " ~ T.stringof ~ " named '" ~ name ~ "' already exists");
+void register(string name, T a)
+{
+  if(name in m_entries)
+    throw new Exception("A " ~ T.stringof ~ " named '" ~ name ~ "' already exists");
 
-    m_entries[name] = a;
-  }
+  m_entries[name] = a;
+}
 
-  T get(string name)
-  {
-    if(name !in m_entries)
-      throw new Exception("No such " ~ T.stringof ~ ": '" ~ name ~ "'");
+T get(string name)
+{
+  if(name !in m_entries)
+    throw new Exception("No such " ~ T.stringof ~ ": '" ~ name ~ "'");
 
-    return m_entries[name];
-  }
+  return m_entries[name];
+}
 
-  string[] keys()
-  {
-    return m_entries.keys;
-  }
+string[] keys()
+{
+  return m_entries.keys;
+}
 
-  T[string] m_entries;
+T[string] m_entries;
 }
 

@@ -9,8 +9,8 @@
 // - Takes a ViewModel and renders it.
 // - Receives user events, and forward them to the presenter (through an InputSink)
 
-import SDL;
 import input_sink;
+import SDL;
 import view;
 
 static this()
