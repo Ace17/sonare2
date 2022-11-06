@@ -38,6 +38,9 @@ class Presenter : InputSink, EditBox.Sink
 
     auto getInstruction(int index)
     {
+      if(m_doc.regions.length == 0)
+        return Instruction(ulong.max);
+
       auto reg = m_doc.regions[0];
 
       if(index < 0 || index >= reg.instructions.length)
