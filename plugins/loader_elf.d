@@ -99,14 +99,14 @@ private:
   {
     foreach(symtab; elf.symbol_tables)
     {
-      foreach(SYM_TAB_IDX iSymbolIdx, s; symtab.symbols)
+      foreach(iSymbolIdx, s; symtab.symbols)
       {
         if(iSymbolIdx == 0)
           continue;
 
         if(s.st_name)
         {
-          string sName = elf.GetSymbolName(symtab.section_index, iSymbolIdx);
+          string sName = elf.GetSymbolName(symtab.section_index, cast(SYM_TAB_IDX)iSymbolIdx);
           prog.symbols[s.st_value] = sName;
         }
       }
@@ -474,10 +474,10 @@ private:
   // Parses input stream and fills internal buffers with raw
   void ParseRawSections(Stream f)
   {
-    foreach(SECTION_IDX i, sh; sectionHeaders)
+    foreach(i, sh; sectionHeaders)
     {
       CRawSection raw_sect = new CRawSection;
-      raw_sect.section_index = i;
+      raw_sect.section_index = cast(SECTION_IDX)i;
       raw_sect.data.length = sh.sh_size;
       raw_sect.info.length = sh.sh_size;
 
@@ -495,13 +495,13 @@ private:
   void ParseStringTables(Stream f)
   {
     // parse string tables
-    foreach(SECTION_IDX i, sh; sectionHeaders)
+    foreach(i, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_STRTAB)
         continue;
 
       CStringTable table = new CStringTable;
-      table.section_index = i;
+      table.section_index = cast(SECTION_IDX)i;
 
       f.position(sh.sh_offset);
 
@@ -530,13 +530,13 @@ private:
 
   void ParseSymbolTables(Stream f)
   {
-    foreach(SECTION_IDX i, sh; sectionHeaders)
+    foreach(sectionIndex, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_SYMTAB && sh.sh_type != SHT_DYNSYM)
         continue;
 
       CSymbolTable table = new CSymbolTable;
-      table.section_index = i;
+      table.section_index = cast(SECTION_IDX)sectionIndex;
 
       // link to strtab section
       table.p_strtab = GetStringTable(sh.sh_link);
@@ -577,13 +577,13 @@ private:
   void ParseRelocationSections(Stream f)
   {
     // parse relocation sections
-    foreach(SECTION_IDX i, sh; sectionHeaders)
+    foreach(i, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_REL)
         continue;
 
       CRelocationTable table = new CRelocationTable;
-      table.section_index = i;
+      table.section_index = cast(SECTION_IDX)i;
 
       // link to symtab section
       table.p_symtab = GetSymbolTable(sh.sh_link); // sh_link
@@ -633,13 +633,13 @@ private:
   void ParseCode(Stream f)
   {
     // parse progbits sections
-    foreach(SECTION_IDX i, sh; sectionHeaders)
+    foreach(i, sh; sectionHeaders)
     {
       if(sh.sh_type != SHT_PROGBITS)
         continue;
 
       CProgbitsSection progbits = new CProgbitsSection;
-      progbits.section_index = i;
+      progbits.section_index = cast(SECTION_IDX)i;
       f.position(sh.sh_offset);
       progbits.data.length = sh.sh_size;
 

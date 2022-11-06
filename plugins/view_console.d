@@ -116,7 +116,7 @@ class ConsoleView : IView
 
       ulong attr = ulong.max;
 
-      foreach(int i, c; line.text)
+      foreach(i, c; line.text)
       {
         int pair;
         final switch(c.color)
@@ -141,7 +141,7 @@ class ConsoleView : IView
         attr = COLOR_PAIR(pair);
 
         wattron(m_txtWindow, attr);
-        CHECK!mvwaddch(m_txtWindow, 1 + k, 1 + i, c.value);
+        CHECK!mvwaddch(m_txtWindow, 1 + k, 1 + cast(int)i, c.value);
         wattroff(m_txtWindow, attr);
       }
     }
