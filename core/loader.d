@@ -41,7 +41,7 @@ string guessFormat(string path)
     if(g_Loaders.get(name).probe(path))
       return name;
 
-  return g_Loaders.keys[0];
+  return "raw";
 }
 
 interface Loader
