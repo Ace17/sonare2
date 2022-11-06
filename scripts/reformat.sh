@@ -2,8 +2,9 @@
 
 scriptDir=$(dirname $0)
 
+readonly expectedVersion="Uncrustify-0.72.0_f"
 ver=$(uncrustify --version)
-if [ ! "$ver" = "uncrustify 0.64" ] ; then
+if [ ! "$ver" = "$expectedVersion" ] ; then
   echo "Bad version of uncrustify, skipping formatting"
   exit 0
 fi
